@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">Error:</span>
+  Enter a valid email address
+</div>
+<form action="/index" method="post"  enctype="multipart/form-data">
+	<!-- selecting karyotype: default is set to hs-->	
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Karyotype</h3>
+ 		</div>
+  		<div class="panel-body">
+    			<input type='radio' name='karyotype' value='hs' checked>Homo sapiens
+			<br>
+			<input type='radio' name='karyotype' value='mm'>Mouse
+  		</div>
+	</div>
+
+	<!-- 2D Data tracks -->
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">2D Data Tracks</h3>
+ 		</div>
+  	<div class="panel-body">
+		<div class="container-fluid">		
+			<div class="row">
+				<div class="col-md-6">
+					<!-- Gene expression track-->	
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">Gene Expression</h4>
+ 						</div>
+  						<div class="panel-body">				
+							Graphical representation: <br>
+							<select id="g_gene" size="2">
+								<option value="line">Line Plots</option>
+								<option value="histogram">Histograms</option>
+							</select>    
+							<br><br>
+							Orientation:
+							<br>
+							<input type='radio' name='o_gene' value='in' checked>In
+							<br>
+							<input type='radio' name='o_gene' value='out'>Out
+							<br><br> 
+							Data: 
+							<input type='file' name='f_gene'>
+  						</div>
+					</div>
+				</div>
+				
+				<div class="col-md-6">
+					<!-- SNPs track-->
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">SNPs</h4>
+ 						</div>
+  						<div class="panel-body">				
+							Graphical representation: 
+							<br>
+							<select id="g_snp" size="2">
+								<option value="heatmap">Heat Maps</option>
+								<option value="scatter">Scatter Plots</option>
+							</select>    
+							<br><br>
+							Orientation:
+							<br>
+							<input type='radio' name='o_snp' value='in' checked>In
+							<br>
+							<input type='radio' name='o_snp' value='out'>Out
+							<br><br> 
+							Data: 
+							<input type='file' name='f_snp'>
+  						</div>	
+					</div>		
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<br><br>
+
+	<input class="btn btn-primary" type="submit" value="Generate">	
+</form>
+{% endblock %}
+

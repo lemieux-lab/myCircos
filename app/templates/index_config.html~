@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block help%}
+<center><h3>Personalized Notes</h3></center>
+<p>You are free to write any personalized notes in the <em>Description</em> box. These notes will be displayed in the <em>Details</em> box when viewing Circos, and can serve as future reference.</p>
+
+<center><h3>Files upload</h3></center>
+<p>You can either upload a <b>.zip</b> or a <b>.tar</b> package. This package must contain all the files needed to generate your Circos, i.e.</p>
+<p><ul>
+  <li><font color="#6495ED">circos.conf</font>: this is your main configuration file. It can contain some <em>&lt&ltinclude&gt&gt</em> parameters. You do not have to specify a <em>file</em> nor a <em>dir</em> parameter.</li>
+ <li><font color="#6495ED">other .conf</font>: all the configuration files that you referred to in your circos.conf</li>
+  <li><font color="#6495ED">karyotype.conf</font>: file with the desired karyotype</li>
+ <li><font color="#6495ED">.txt</font>: all the data files needed for your track(s), links and/or labels. 
+</ul></p>
+<p>Every file need to be formmatted according to the Circos conventions. When writing the path to one of your data files, just write the name of the file.</p>
+<p><pre>&ltplots&gt<br>  ...<br>  &ltplot&gt<br>    type  = histogram<br>    file  = hist1.txt<br>    ...<br>  &lt/plot&gt<br>  &lt/plots&gt</pre></p>
+<p>Please do not use sub-folder(s) in your package: only multiple single files.</p>
+{% endblock %}
+
+{% block header %}
+<h1> Upload configuration file(s) <small>.tar or .zip 
+{% endblock %}
+
+{% block content %}
+<form action="/index_config" method="post"  enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-md-6">
+			<!-- personal notes from the user -->
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Description</h3>
+				</div>
+				<div class="panel-body">
+					<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
+			</div>
+		</div>
+		</div>
+	</div>
+	
+	<div class="row">	
+		<div class="col-md-6">
+			<!-- configuration file -->
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Files</h3>
+ 				</div>
+  				<div class="panel-body">
+					<label for="config">.tar or .zip</label><br>
+					<input type='file' name="config">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
+				<br><br>
+			<br><br>
+		</div>
+	</div>
+</form>
+{% endblock %}

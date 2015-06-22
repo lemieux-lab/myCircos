@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block header %}
+<h1>Unauthorized <span class="label label-danger">Error</span></h1>
+{% endblock %}
+
+{% block content %}
+<h4>Authorization is required to acces this page: you must  <a href="{{ url_for('login') }}" class="alert-link">login</a> first! <br><br> This server could not verify that you are authorized to access the page requested. <br><br> Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required.</h4>
+{% endblock %}

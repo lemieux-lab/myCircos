@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block help %}
+<center><h3>Registration</h3></center>
+<p>Your email address will serve as your username. It will also be used to send you a notification once your Circos is ready: please use a <b>valid address</b>.</p>
+<p>If you receive an <b>error message</b>, someone already used this address and/or this password: please try again with new credentials.</p>
+{% endblock %}
+
+{% block header %}
+<h1> Register </h1>
+{% endblock %}
+
+{% block content %}
+<form action="/registered" method="post"  enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Registration</h3>
+			 	</div>
+			  	<div class="panel-body">
+					<div class="container-fluid">		
+						<div class="row">
+							<div class="col-md-6">
+			    					<label for="email">Email</label>
+			    					<input type="email" class="form-control" id="email" name="email">
+								<br>
+			  				</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<label for="password">Password</label>
+			   					<input type="password" class="form-control" id="password" name="password">
+			  				</div>
+							<div class="col-md-6">
+			    					<label for="confirm_password">Confirm Password</label>
+			   					<input type="password" class="form-control" id="confirm" name="confirm">
+								<br><br>
+			  				</div>
+						</div>
+						<div class="row">
+							<div class="col-md-1">
+			  					<button type="submit" class="btn btn-primary">Register</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "image.html" %}
+
+{% block header %}
+<h1> View MyCircos <small>{{ unique }}</small></h1>
+{% endblock %}
+
+
+{% block url %}
+"{{url_for('get_circos', unique=unique)}}"
+{% endblock %}
+

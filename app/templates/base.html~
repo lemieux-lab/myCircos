@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html LANG='EN'>
+	<head>
+		{% if title %}
+		<title>{{ title }}</title>
+		{% else %}
+		<title>Circos Interface</title>
+		{% endif %}
+
+		{% block head %}{% endblock %}
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    		<!-- Optional theme -->
+    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+   		<!-- <link rel="stylesheet" href="/static/css/main.css">-->
+
+    		{% block style %}
+		<style>
+			.container-fluid {
+			    margin-left: auto;
+			    margin-right: auto;
+			    width: 97%;
+			}
+		</style>
+		{% endblock %}
+	</head>
+
+	<body>
+		<div class="container-fluid">
+			<!-- navigation bar-->
+			<nav class="navbar navbar-standard" role="navigation">
+	    			<ul class="nav navbar-nav">
+					<li><a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"></span> Home </a></li>
+					<li class="dropdown">
+		    				<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-repeat"></span> Generate a Circos </a>
+		    				<ul class="dropdown-menu">
+		       			 	<li><a href="/generate/data"> From data files </a></li>
+		        			<li><a href="/generate/config"> From configuration files </a></li>
+						</ul>
+	       				</li>
+					<li><a class="navbar-brand" href="/mycircos"><span class="glyphicon glyphicon-folder-open"></span> MyCircos </a></li>
+				
+	    			</ul>
+				<ul class="nav navbar-nav pull-right">
+					<li><a class="navbar-brand" href="#" role="button" data-toggle="modal" data-target="#help_info"><span class="glyphicon glyphicon-question-sign"></span> Help </a><li>
+					<li class="dropdown">
+				    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+							{% if current_user.is_authenticated() %}
+								{{ current_user.email }} 
+							{% else %}
+								User  
+							{% endif %}
+						</a>
+				    		<ul class="dropdown-menu">
+				       	 		<li><a href="/logout">Log Out</a></li>
+				    		</ul>
+			       		</li>
+				</ul>
+			</nav>
+		
+
+			<!-- help modal -->
+			<div class="modal fade" id="help_info" role="dialog">
+				<div class="modal-dialog" style="overflow-y: scroll; max-height:85%;  margin-top: 50px; margin-bottom:50px;"> 
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4> Tips & Useful Facts </h4>
+						</div>
+						<div class="modal-body" height="250px" overflow-y="auto">
+							{% block help %}
+							<center><h3>The Interface</h3></center>
+							<p>This interface aims to be a user-friendly tool when doing circular data visualisation, a.k.a Circos.  There is no need in downloading or installing the Circos software package: the user only have to upload his file(s), select some parameters and click on <em>Generate</em>. The interface will keep track of all generated images their assossiated details. Therefore, when logged in, the user can access a database of his own Circos.</p><br>
+							<p><blockquote>Circos can be used to display any kind of information. It's particularly suitable for layering different data sets to create highly informative infographics with texture and visual appeal.<br> <p align="right"><em>- M. Krzywinski</em></p></blockquote></p> <br>
+							<p>The user can either upload indivual data files, which will represent track(s), links or labels on the final image, or a zip/tar package. The Circos generated can then be downloaded, as well as the configuration package specific to it. The image is outputted as a SVG and therefore can be modified in any image manipulation programs. Directive and tips are listed under the Help option in the menu bar.</p>
+							<p>For more information about Circos, the user can refer to their <a href="http://circos.ca/" class="alert-link">website</a></p><br>
+							<center><h3>To Use It</h3></center>
+							<p>Please note that you must be logged-in in order to use the interface ot to have access to your Circos database. To do so enter your credentials (email address and password) in the login box underneath the "Start Now!" caption. If you are not registered yet, click on the link <em>register</em>, also in the login box.</p>
+							{% endblock %}
+						</div>
+					</div>
+				</div>
+			</div>
+					 
+	
+			
+			<!-- page title -->
+			<div class="page-header">
+		      		{% block header %}<h1> Circos Interface <small>Make your own Circos</small></h1>{% endblock %}
+			</div>
+
+			<!-- error message -->
+			{% if error %}
+			<div class="row">
+				<div class="col-md-6">
+					<div class="alert alert-danger" role="alert">
+		  				<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+		 				<em>{{ error }}</em>
+					</div>
+				</div>
+			</div>
+			{% endif %}
+			
+			<!-- page related content -->
+			{% block content %}
+			{% endblock %}
+			
+		</div>
+	</body>
+
+	<!-- Javascript files -->
+    	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+   	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+    	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="http://twitter.github.io/bootstrap/assets/js/bootstrap-dropdown.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+     	{% block script %}{% endblock %}
+	
+</html>

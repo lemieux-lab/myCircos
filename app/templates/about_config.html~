@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+information on .conf file
+- where to get it when generating circos from data
+- what not to change (LOCATION OF THE IMAGE!!!!!!!!!!!!!!!!!)
+- link to circos
+- download standard.conf if want to work on it themselves: but can't reload standard!!! Our default one will always <<include>> standard.conf (generated data version or uplodaded configuration version)
+{% endblock %}

@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block style %}
+
+
+.emphasized {
+	stroke:black;
+	stroke-width:4.0;
+}
+.hidden {
+	stroke:white;
+	stroke-width:4.0;
+}
+
+
+{% endblock %}
+
+{% block header %}
+<h1> Generated Circos <small>{{ unique }}</small></h1>
+{% endblock %}
+
+{% block content %}
+<!-- hidden -->
+<div class="row">
+	<div class="col-md-8">
+		<div class='svg' id='image_svg' ></div>
+	</div>
+	<div class="col-md-4">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="btn-group" role="group">
+  					<button id='dLabel' type='button' class="btn btn-primary dropdown-toggle" data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Downloads<span class='caret'></span></button>
+  					<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel'>
+						
+    						<li><a href="/download/{{ unique }}/circos_{{ unique }}.svg">Circos.svg</a></li>
+						
+
+						{% if 'specific.conf' in files or 'circos.zip' in files %}
+    						<li><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
+						{% else %}
+						<li class='disabled'><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
+						{% endif %}
+					</ul>
+					<a href="/delete/{{ unique }}" class="btn btn-danger pull-right" role='button'>Delete</a>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<br><br>
+				<div class="btn-group">
+					<button id="information" type="button" onclick="show_info()" class="btn btn-default">Details</button>
+					<button id="legend" type="button" onclick="show_legend()" class="btn btn-default">Legend</button>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<br><br>
+				<div class="btn-group">
+					<button id="emphasize" type="button" class="btn btn-default" class="btn" >Emphasize</button>
+					<button id="hide" type="button" class="btn btn-default" class="btn">Hide</button>
+					<button id="reset" type="button" class="btn btn-default" onclick="reset()">Reset</button>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-8">
+				<br><br><br><br>
+				{% if lines_legend|length > 0 %}
+				<div class="panel panel-default" id="myLegend">
+    					<div class="panel-body">
+						<button type="button" class="close" onclick="hide_legend()">&times;</button>
+						<center><font color="#6495ED"><b><u> Legend </u></b></font></center>
+						{% for l in lines_legend %}
+							{{ l }}
+							<br>
+						{% endfor %}
+		 				<br>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+		{% if lines_info|length > 0 %}
+		<div class="row">
+			<div class="col-md-8">
+				<br><br><br><br>
+				<div class="panel panel-default" id="myInfo">
+    					<div class="panel-body">
+						<button type="button" class="close" onclick="hide_info()">&times;</button>
+						<center><font color="#6495ED"><b><u> Details </u></b></font></center>
+						{% for l in lines_info %}
+							{{ l }}
+							<br>
+						{% endfor %}
+		 				<br>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock%}
+
+{% block script %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript">
+/*******************************************
+****					****
+****	    	INFO - LEGEND		****
+****					****
+********************************************/
+function show_info() {
+    document.getElementById("myInfo").style.visibility = "visible"; 
+}
+
+function hide_info() {
+    document.getElementById("myInfo").style.visibility = "hidden"; 
+}
+
+function show_legend() {
+    document.getElementById("myLegend").style.visibility = "visible"; 
+}
+
+function hide_legend() {
+    document.getElementById("myLegend").style.visibility = "hidden"; 
+}
+
+/*******************************************
+****					****
+****	    	GET SVG 		****
+****					****
+********************************************/
+var timesRun = 0;
+
+getImage();
+
+var refresh = setInterval (function(){getImage()}, 10000);
+
+function getImage () {
+	console.debug("getImage");
+	$.ajax({ 
+ 	   url : {% block url%}"{{url_for('get_svg', unique=unique)}}"{% endblock %},   
+ 	   cache : false,
+ 	   datatype : 'xml',
+
+ 	   success : function(content) {
+ 	   		console.debug(++timesRun);		
+ 	   		if (content=='' | content ==undefined) {
+ 	   			{% block display %}	
+				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
+				{% endblock%} 	   		
+			}
+
+			else if (content == 'error') {
+				$("#image_svg").html('<div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><em>An error has occured while generating your circos. Please check your files and try again</em></div>');
+				$("#info").html('')
+				
+				clearInterval(refresh);
+			}
+
+ 	   		else {  
+				
+				$("#image_svg").html(content);
+                        	var svg = $('#image_svg').find('svg')[0];
+				svg.setAttribute('width', "100%");
+				svg.setAttribute('height', "100%");
+				svg.setAttribute('viewBox', "-250 -150 3500 3500");
+				console.debug(svg);
+				console.debug(svg[0]);
+                        	clearInterval(refresh);
+        			
+				//$('svg text').on('click', function() {
+				//	$(this).css('fill', 'red');
+				//	$(this).css('font-size', '70px');
+				//});
+        			//$('svg path').on('hover', function() { // ideogram // outer
+        			//	$(this).css('fill', 'blue');
+        			//});
+			}
+        		
+        }
+      });
+}
+
+/*******************************************
+****					****
+****	    	INTERACTIVITY 		****
+****					****
+********************************************/
+$(document).ready(function() {
+	$('.btn').on('click', function() {
+		$('.btn.active').removeClass('active');	
+		$(this).addClass('active');
+		console.debug(this);
+
+		var svg = $('#image_svg').find('svg')[0];
+	
+		//hover: tmp	click: set
+
+		if ($("#emphasize").hasClass("active")) {
+			console.debug('emphasize')
+			$('svg text').on('click', function(){
+				$(this).addClass('emphasized');
+			});
+
+			/**
+			//TEXT
+			$('svg text').on({
+				mouseover: function() {		
+					$(this).css('fill', 'red');
+					$(this).css('font-size', '70px');
+				},
+				mouseout: function() {
+					$(this).css('fill', 'black');
+					$(this).css('font-size', '26px');
+				},
+				click: function() {
+					$(this).off('mouseout');
+				}
+			});
+			
+			//PATH
+			$('svg path').on({
+				mouseover: function() {		
+					$(this).css('stroke', 'red');
+					$(this).css('stroke-width', '15.0');
+				},
+				mouseout: function() {
+					$(this).css('stroke', 'black');
+					$(this).css('stroke-width', '4.0');
+				},
+				click: function() {
+					$(this).off('mouseout');
+				}
+			});
+			$('svg lines').on('click hover', function() { 		//links 
+				$(this).css('stroke', 'red');
+				$(this).css('stroke-width', '7.0');
+			});**/
+		}
+	
+		else if ($("#hide").hasClass("active")) {
+			console.debug('hide')
+			$(this).addClass('emphasized');
+			/**$('svg text').on('click', function() {
+				$(this).css('fill', 'white');
+				});
+			$('svg path').on('click', function() { // ideogram // outer
+				$(this).css('fill', 'white');
+				$(this).css('stroke', 'white');
+				
+			});**/
+		}	
+	});	
+});
+
+function reset() {
+	document.location.reload(true);
+	console.debug('refreshed');
+}
+
+		
+</script>
+{% endblock %}

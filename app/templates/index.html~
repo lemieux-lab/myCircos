@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block style %}
+<style>
+textarea {
+    height: 100px;
+    width: 100%;
+    box-sizing:border-box;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning" role="alert">
+	<span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+  	Already have your specific.conf? <a href="{{ url_for('generate/config') }}" class="alert-link">Generate a Circos</a>
+</div>
+
+<form action="/index" method="post"  enctype="multipart/form-data">
+	<!-- personal notes from the user -->
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Description</h3>
+ 		</div>
+  		<div class="panel-body">
+			<textarea class="form-control" rows="3" id="comments" placeholder="Notes on the ploted data"></textarea>
+  		</div>
+	</div>
+	<!-- selecting karyotype: default is set to hs-->	
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Karyotype</h3>
+ 		</div>
+  		<div class="panel-body">
+    			<input type='radio' name='karyotype' value='hs' checked>Homo sapiens
+			<br>
+			<input type='radio' name='karyotype' value='mm'>Mouse
+  		</div>
+	</div>
+
+	<!-- 2D Data tracks -->
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">2D Data Tracks</h3>
+ 		</div>
+  	<div class="panel-body">
+		<div class="container-fluid">		
+			<div class="row">
+			        <div class="col-md-12">
+				        <!-- Gene density track-->
+					<div class="panel panel-default">
+					       <div class="panel-heading">
+						       <h4 class="panel-title">Gene Density</h4>
+					       </div>
+					       <div class="panel-body">
+						       <input type='radio' name='density' value='yes' checked>Display
+						       <br>
+						       <input type='radio' name='density' value='no'>Don't display
+					       </div>
+                                        </div>
+                                </div>
+			</div>
+		        <div class="row">
+				<div class="col-md-6">
+					<!-- Gene expression track-->	
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">Gene Expression</h4>
+ 						</div>
+  						<div class="panel-body">				
+							Graphical representation: <br>
+							<select name="g_gene" id="g_gene">
+								<option value="line">Line Plots</option>
+								<option value="histogram">Histograms</option>
+							</select>    
+							<br><br>
+							Orientation:
+							<br>
+							<input type='radio' name='o_gene' value='out' checked>Out
+							<br>
+							<input type='radio' name='o_gene' value='in'>In
+							<br><br> 
+							Data: 
+							<input type='file' name='f_gene'>
+  						</div>
+					</div>
+				</div>
+				
+				<div class="col-md-6">
+					<!-- SNPs track-->
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">SNPs</h4>
+ 						</div>
+  						<div class="panel-body">				
+							Graphical representation: 
+							<br>
+							<select name="g_snp" id="g_snp">
+								<option value="heatmap">Heat Maps</option>
+								<option value="scatter">Scatter Plots</option>
+							</select>    
+							<br><br>
+							Orientation:
+							<br>
+							<input type='radio' name='o_snp' value='out' checked>Out
+							<br>
+							<input type='radio' name='o_snp' value='in'>In
+							<br><br> 
+							Data: 
+							<input type='file' name='f_snp'>
+  						</div>	
+					</div>		
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<br><br>
+
+	<input class="btn btn-primary" type="submit" value="Generate">	
+</form>
+{% endblock %}
+

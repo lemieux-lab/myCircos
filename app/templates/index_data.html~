@@ -1,0 +1,214 @@
+{% extends "base.html"%}
+
+{% block help %}
+<center><h3>Personalized Notes</h3></center>
+<p>You are free to write any personalized notes in the <em>Description</em> box. These notes will be displayed in the <em>Details</em> box when viewing Circos, and can serve as future reference.</p>
+
+<center><h3>Karyotype</h3></center>
+<p>You can either have a <b>Homo sapiens</b> or a <b>mouse</b> karyotype.</p>
+<p>You also have the option to use the entire karyotype or only some chromosomes. It the latter case, please follow the proper orthograph, as demonstrated:</p>
+<p><pre><b>/chr[1-4]$/</b> would diplay chromosomes 1, 2, 3 and 4 <br><b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br><b>/chr[1-4]$/;chr6;chr9</b> would display chromosomes 1, 2, 3, 4, 6 and 9</pre></p>
+<p>Any changes will cause Circos to fail.</p>
+
+<center><h3>Labels</h3></center>
+<p>Labels will be displayed on the outter side of your ideogram. Only <b>.txt</b> are accepted and they must be correctly formatted: </p>
+<p><font color="#6495ED"><pre>#chr 	start		end		value</font><br>...<br>chr1	245385825	245401941	ZNF124</pre></p>
+
+<center><h3>Links</h3></center>
+<p>Labels will be displayed as the largest and innermost track of your Circos. You can give a brief name/description to your links. Only <b>.txt</b> are accepted and they must be correctly formatted: </p>
+<p><font color="#6495ED"><pre>#from	start	end	#to	start	end</font><br>...<br>chr1	400	550	chr3	500	750</pre></p>
+
+<center><h3>Tracks</h3></center>
+<p>The data used to generate the <b>Gene Density</b> histogram is from the <b>UCSC Genome Browser</b>. You can add and remove as many tracks as you want. For each one, you must choose a graphical representation (<em>histogram, heat plot, scatter plot or tiles</em>) and upload a <b>.txt</b> file. You can also give each track its own name, which could useful for future reference. Again, the submitted file must be correctly formatted: </p>
+<p><font color="#6495ED"><pre>#chr	start	end	value</font><br>...<br>chr19	305575	344791	3.11363</pre></p><br>
+<p>For more information on how to format your data files, please refer to the Circos <a href="http://circos.ca/" class="alert-link">tutorials</a>.</p>
+
+{% endblock %}
+
+{% block header %}
+<h1> Upload data file(s) <small>.txt</small></h1>
+{% endblock %}
+
+{% block content%}
+<form action="/index_data" method="post"  enctype="multipart/form-data">
+<div class="row">
+	<div class="col-md-10">
+		<!-- personal notes from the user -->
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Description</h3>
+			</div>
+			<div class="panel-body">
+				<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-10">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Karyotype</h3>
+					</div>
+					<div class="panel-body">
+						<!-- selecting karyotype: default is set to hs-->	
+						<div class="row">
+							<div class="col-md-6">
+								<input type='radio' name='karyotype' value='hs' checked>Homo sapiens
+							</div>
+							<div class="col-md-6">
+								<input type='radio' name='karyotype' value='mm'>Mouse
+							</div>
+						</div>
+						<!-- specific chromosome(s) display -->
+						<div class="row">
+							<div class="col-md-12">
+								<label for="chr">By default, the entire karyotype will be displayed. I you want only specific chromosome please enter them here:</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-1">
+							</div>
+							<div class="col-md-11">
+								E.g. <b>/chr[1-4]$/</b> would diplay chromosomes 1, 2, 3 and 4 <br>
+								E.g. <b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br>
+								E.g. <b>/chr[1-4]$/;chr6;chr9</b> would display chromosomes 1, 2, 3, 4, 6 and 9<br><br>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<input type="text" class="form-control" placeholder="Chromosome(s) to be displayed" id="chr" name="chr">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<!-- labels -->
+				<div class="row">
+					<div class="col-md-12">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3 class="panel-title">Labels</h3>
+							</div>
+							<div class="panel-body">
+								<input type='file' id="labels_file" name='labels_file'>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- links -->
+				<div class="row">
+					<div class="col-md-12">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3 class="panel-title">Links </h3>
+							</div>
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-md-6">
+										<input type="text" class="form-control input-sm" placeholder="Links name" name="links" id="links">
+									</div>
+									<div class="col-md-6">
+										<input type='file' id="links_file" name='links_file'>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-10">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">2D Data Tracks</h3>
+ 			</div>
+			<div class="panel-body">
+				<div class="container-fluid">	
+					<div class="row">
+						<div class="col-md-10">
+							<!-- Gene density track-->
+							<div class="panel panel-default">
+					       			<div class="panel-heading">
+						       			<h4 class="panel-title">Gene Density</h4>
+					      			</div>
+					      			<div class="panel-body">
+									<label for="density">Would you like to display a histogram of genes density as your first track?</label><br>
+									<div class="row">
+										<div class="col-md-6">
+						       					<input type='radio' name='density' value='yes' checked>Display
+						      				</div>
+										<div class="col-md-6">
+						       					<input type='radio' name='density' value='no'>Don't display
+										</div>
+									</div>
+					       			</div>
+							</div>
+						</div>
+						
+					</div>
+			
+					<div class="row">
+						<div class="col-md-12">
+							<div class="add_track">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-10">
+						</div>
+						<div class="col-md-2">
+							<button id="add" type="button" class="btn btn-default pull-right">Add Track</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-10">
+		<div class="row">
+			<div class="col-md-10">
+			</div>
+			<div class="col-md-2">
+				<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
+				<br><br>		
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+{% endblock %}
+
+{% block script %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script type="text/javascript">
+var i = 1;
+	$(document).ready(function() {
+		$("#add").click(function () {
+			$("<div class='added' id='track'><div class='row'><div class='col-md-10'><div class='panel panel-default'><div class='panel-heading'><div class='row'><div class='col-md-6'><input type='text' class='form-control input-sm' placeholder='Track name' id='name"+i+"' name='name"+i+"'></div></div></div><div class='panel-body'><div class='row'><div class='col-md-4'><label for='graph'>Graphical representation</label><br><select name='graph"+i+"' id='graph"+i+"'><option value='histogram'>Histograms</option><option value='scatter'>Scatter Plots</option><option value='heatmap'>Heat Maps</option><option value='tile'>Tiles</option></select></div><div class='col-md-3'><label for='orientation'>Orientation</label><br><select name='orientation"+i+"' id='orientation"+i+"'><option value='out'>Out</option><option value='in'>In</option></select></div><div class='col-md-5'><label for='data'>Data</label><input type='file' id='file"+i+"' name='file"+i+"'></div></div></div></div></div><div class='col-md-2'><button class='remove btn btn-default pull-right btn-sm' type='button'><span class='glyphicon glyphicon-trash'></span></button></div></div></div>").appendTo('.add_track');
+			i++;
+			console.debug(i);
+	    		});
+		$('.remove').live("click",function() {
+			$(this).closest('#track').fadeOut("slow", function() {
+				$(this).remove();;
+			console.debug(i);
+	      		});
+	    	});
+	});
+</script>
+{% endblock %}
