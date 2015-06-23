@@ -35,7 +35,7 @@ def maintenance():
     tmp_image = '%s/%s/%s/image' % (USER, user, unique)
     os.makedirs(tmp_data)
     os.makedirs(tmp_image)
-    shutil.copy('%s/standard.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
+    shutil.copy('%s/circos.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
   else:
     maintenance()
   print 'maintenance finished'

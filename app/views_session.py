@@ -7,6 +7,7 @@
 import os, os.path
 from flask import render_template, redirect, url_for, request, session 
 from flask.ext.login import login_user, logout_user, current_user, login_required
+from passlib.hash import md5_crypt
 from app import app, db, lm, models
 from util import *
 from views import *
@@ -37,13 +38,21 @@ def register():
 def logged():
   email = request.form['email']
   password = request.form['password']
-  registered_user = User.query.filter_by(email=email, password=password).first()
-  
-  if registered_user is None:
-    return redirect(url_for('error', template='home', error='Email address or Password is invalid. Please try again or register.'))
-  login_user(registered_user)
-  session['logged_in'] = True
-  return redirect(url_for('data'))
+  #looking if good credentials
+  username = User.query.filter_by(email=email).first()
+  if username:
+    hash = username.password
+    print username 
+    print hash
+    print md5_crypt.verify(password, hash)
+    if md5_crypt.verify(password, hash):
+      registered_user = User.query.filter_by(email=email, password=hash).first()
+    else:
+     return redirect(url_for('error', template='home', error='Password is invalid. Please try again or register.'))
+    login_user(registered_user)
+    session['logged_in'] = True
+    return redirect(url_for('data'))
+  return redirect(url_for('error', template='home', error='Email address is invalid. Please try again or register.'))
   
 
 #action: registering
@@ -57,12 +66,15 @@ def registered():
     if User.query.filter_by(email=email).first() is not None or User.query.filter_by(password=password).first() is not None:
       return redirect(url_for('error', template='register', error='Someone already has these credentials. Please use another email and/or password'))
     else:
-      user = User(email=email, password=password)
+      #hashing the password
+      hash = md5_crypt.encrypt(password)
+      #adding new credentials to db
+      user = User(email=email, password=hash)
       db.session.add(user)
       db.session.commit()
 
     #login new user automatically
-    registered_user = User.query.filter_by(email=email, password=password).first()
+    registered_user = User.query.filter_by(email=email, password=hash).first()
     login_user(registered_user)
     session['logged_in'] = True
 

@@ -115,6 +115,7 @@ def index_data():
   unique = maintenance()
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
+  KARYOTYPE = 'app/circos/karyotypes'
   INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
   LEGEND = '%s/%s/%s/legend.txt' % (USER, user, unique)
 
@@ -129,7 +130,8 @@ def index_data():
        
     #VALUES
     values.update({'karyotype': request.values['karyotype'], 'chr': request.values['chr'], 'density': request.values['density']})
-    
+    shutil.copy('%s/karyotype.%s.txt' % (KARYOTYPE, values['karyotype']), TASK)
+
     #writing basic information
     with open(INFO, 'a' ) as f: 
       f.write('Type: from data files\n\nDate: %s\nID: %s\nKaryotype: %s\nDensity: %s\nDescription: %s\n\n' % (datetime.date.today(), unique, values['karyotype'], values['density'], request.values['comments']))
@@ -237,7 +239,7 @@ def index_data():
 
     #generating the configuration files and the image
     generate(unique=unique, plots=plots, links=links, values=values)
-    circos('%s/standard.conf' % (TASK), unique) 
+    circos('%s/circos.conf' % (TASK), unique) 
     return redirect(url_for('circos_display', unique=unique))
   return redirect(url_for('error', template='index_data', error='An error occured while loading your file(s). Please try again'))
    
@@ -294,7 +296,7 @@ def index_config():
 @login_required
 def circos_display(unique):
   user = authenticate()
-  LEGEND = '%s/%s/%s/info.txt' % (USER, user, unique)
+  LEGEND = '%s/%s/%s/legend.txt' % (USER, user, unique)
   TASK = '%s/%s/%s' % (USER, user, unique)
 
   #info to show in details box

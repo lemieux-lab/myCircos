@@ -13,7 +13,6 @@ process = {}
 
 CONF = 'app/circos'
 USER = 'app/circos/usr'
-KARYOTYPE = 'app/circos/karyotypes'
 
 
 ########## BOTH #################
@@ -30,18 +29,8 @@ def circos(path, unique):
 ########## FROM DATA ############
 #list of all tracks to be displayed that we uploaded
 def track_list(all_values):
-  n = 0 
-  for val in all_values:
-    if 'name' in val:
-      n = n + 1
-
   #IDs
-  ids = []
-  if n > 0:
-    for val in all_values:
-      if 'name' in val:
-	ids.append(int(val[4]))
-    ids = sorted(ids)
+  ids = sorted([int(val[4:]) for val in all_values if 'name' in val])
   return ids
 
 
@@ -57,7 +46,7 @@ def generate(unique, plots, links, values):
  
     #selectioning the appropriate karyotype: homo sapiens (default) or mouse 
     if values['karyotype'] == 'mm': 
-      f.write('karyotype* = %s/karyotype.mouse.txt \n\n' % (KARYOTYPE))
+      f.write('karyotype* = karyotype.mm.txt\n')
 
     #specific chromosome display
     if values['chr'] == '':

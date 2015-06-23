@@ -10,7 +10,7 @@ from werkzeug import secure_filename
 import tarfile, zipfile
 from util import *
 
-ALLOWED_EXTENSIONS = set(['txt', 'tar', 'zip'])
+ALLOWED_EXTENSIONS = set(['txt', 'tar', 'zip', 'gz'])
 USER = 'app/circos/usr'
 
 #check if extension is valid
@@ -24,11 +24,14 @@ def file_upload(file, unique):
   filename = secure_filename(file.filename)
   file.save(os.path.join('%s/%s/%s/data' % (USER, user, unique), filename))
 
-#unpacking .tar
+#unpacking .tar and .tar.gz
 def un_tar(data, unique):
   print 'unpacking tar folder'
   user = authenticate()
-  t = tarfile.open(data, 'r')
+  if '.g' in data:
+    t = tarfile.open(data, 'r:gz')
+  else:
+    t = tarfile.open(data, 'r')
   t.extractall('%s/%s/%s/data' % (USER, user, unique))
 
 #unpacking .zip

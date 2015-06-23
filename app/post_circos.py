@@ -23,7 +23,7 @@ def zip_circos(unique):
   task_folder = '%s/%s/%s' % (USER, user, unique)
   files = os.listdir(task_folder)
   for f in files:
-    if '.conf' in f or 'gene_density' in f:
+    if '.conf' in f or 'gene_density' in f or 'karyotype' in f:
       zip_file.write('%s/%s/%s/%s' % (USER, user, unique, f), f)
       os.remove('%s/%s/%s/%s' % (USER, user, unique, f)) 
   zip_file.close() 
