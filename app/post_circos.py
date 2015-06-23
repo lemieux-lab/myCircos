@@ -8,6 +8,7 @@
 import os, os.path
 import datetime, time, shutil, tarfile, zipfile, stat
 import smtplib
+from flask import request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from util import *
@@ -45,6 +46,8 @@ def send_email(unique):
   print 'sending email'
   no_reply = 'circos@binfo09.iric.ca'
   user = authenticate()
+  host = request.host_url
+  print host
   
   msg = MIMEMultipart()
 
@@ -52,7 +55,7 @@ def send_email(unique):
   msg['From'] = no_reply
   msg['To'] = user
 
-  message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: http://binfo09.iric.ca:8095/circos_display/%s' % (unique)
+  message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s' % (host, unique)
   msg.attach(MIMEText(message, 'plain'))
 
   try:

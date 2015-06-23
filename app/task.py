@@ -32,9 +32,7 @@ def maintenance():
     os.makedirs(directory)
     #tmp
     tmp_data = '%s/%s/%s/data' % (USER, user, unique)
-    tmp_image = '%s/%s/%s/image' % (USER, user, unique)
     os.makedirs(tmp_data)
-    os.makedirs(tmp_image)
     shutil.copy('%s/circos.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
   else:
     maintenance()

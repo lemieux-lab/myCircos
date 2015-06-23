@@ -322,42 +322,46 @@ def get_svg(unique):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
   DATA = '%s/%s/%s/data' % (USER, user, unique)
-  IMG = '%s/%s/%s/image' % (USER, user, unique)
-  SVG = '%s/%s/%s/image/circos_%s.svg' % (USER, user, unique, unique)
-  PNG = '%s/%s/%s/image/circos_%s.png' % (USER, user, unique,unique)
+  SVG = '%s/%s/%s/circos_%s.svg' % (USER, user, unique, unique)
+  PNG = '%s/%s/%s/circos_%s.png' % (USER, user, unique,unique)
   content = '' 
 
-  p = process.get('%s_circos' % (unique), 'None')
-  
-  if os.path.isfile('process.txt'): #if file is there, then circos is still running
+  #previous circos
+  if os.path.isfile(SVG) and not Circos.query.filter_by(svg=unique).first() is None:
+    print 'getting previous circos'
+    print Circos.query.filter_by(svg=unique).first()
+    content = open(SVG).read()
     return content
 
+  #current circos
   else:
-    print 'looking for error in circos'
-    #look for any error
-    error = '%s/error.txt' % (TASK)
-    file_ready(error)
-    logs(unique)
-    with open(error, 'r') as f:
-      for line in f:
-        if '*** CIRCOS ERROR ***' in line:
-          content = 'error'
-          print 'an error was found'
-	  return content
-    print 'no error'
+    print 'getting current circos'
+    p = process.get('%s_circos' % (unique), 'None')
+    if os.path.isfile('process.txt'): #if file is there, then circos is still running
+      return content
+
+    else:
+      print 'looking for error in circos'
+      #look for any error
+      error = '%s/error.txt' % (TASK)
+      file_ready(error)
+      logs(unique)
+      with open(error, 'r') as f:
+        for line in f:
+          if '*** CIRCOS ERROR ***' in line:
+            content = 'error'
+            print 'an error was found'
+	    return content
+      print 'no error'
     
-    if os.path.isfile(SVG): 
-     file_ready(SVG)
-     try: 
+      if os.path.isfile(SVG): 
+       file_ready(SVG)
        content = open(SVG).read()
        #copy files into task folder
        if os.path.exists('%s/specific.conf' % (DATA)):
          shutil.copy('%s/specific.conf' % (DATA), TASK)
-       shutil.copy(SVG, TASK)
-       shutil.copy(PNG, TASK)
        #erase tmp 
        shutil.rmtree(DATA)
-       shutil.rmtree(IMG)
        #create circos.zip
        zip_circos(unique)
        #save circos into db
@@ -366,11 +370,8 @@ def get_svg(unique):
          db.session.add(circos)
          db.session.commit()
        #send notification/email to user
-       send_email(unique)
-     except Exception, e:
-       print 'There was an error while looking for the SVG: ', e 
-  return content
-
+       send_email(unique) 
+       return content
 
 ####################################
 ##				  ##
@@ -462,49 +463,6 @@ def get_png(unique):
   directory = 'circos/usr/%s/%s' % (user, unique)
   return send_file('%s/circos_%s.png' % (directory, unique), mimetype='image/png')
 
-
-####################################
-##				  ##
-##     DISPLAY PREVIOUS CIRCOS 	  ##
-##				  ##
-####################################
-@app.route('/get_circos/<unique>', endpoint='get_circos')  #a lot like get_svg: same principle
-@login_required
-def get_circos(unique):
-  user = authenticate()
-  TASK = '%s/%s/%s' % (USER, user, unique)
-  SVG = '%s/%s/%s/circos_%s.svg' % (USER, user, unique, unique)
-  content = ''
-
-  try:
-    if os.path.exists(TASK):
-     content = open(SVG).read()
-  except Exception, e:
-    print 'There was an error while looking for a previous SVG: ', e
-  return content
-
-
-####################################
-##				  ##
-##     VIEW PREVIOUS CIRCOS 	  ##
-##				  ##
-####################################
-@app.route('/get_info/<unique>',  methods=['GET', 'POST'], endpoint='get_info')
-@login_required
-def get_info(unique):
-  user = authenticate()
-  TASK = '%s/%s/%s' % (USER, user, unique)
-
-  #info to show in details box
-  lines_info = info(unique)
-  #info to show in LEGEND box
-  if os.path.exists('%s/legend.txt' % (TASK)):
-    lines_legend = legend(unique)
-  else:
-    lines_legend = []
-  #look if circos.zip can be downloaded
-  files = os.listdir(TASK) 
-  return render_template('viewcircos.html', title='View MyCirco', lines_info=lines_info, lines_legend=lines_legend, unique=unique, files=files)
 
 
 

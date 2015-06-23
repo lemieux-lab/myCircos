@@ -138,7 +138,7 @@ var timesRun = 0;
 
 getImage();
 
-var refresh = setInterval (function(){getImage()}, 10000);
+var refresh = setInterval (function(){ getImage(); }, 10000);
 
 function getImage () {
 	console.debug("getImage");
@@ -148,6 +148,7 @@ function getImage () {
  	   datatype : 'xml',
 
  	   success : function(content) {
+			console.debug('if statement')
  	   		console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
@@ -163,7 +164,7 @@ function getImage () {
 			}
 
  	   		else {  
-				
+				clearInterval(refresh);
 				$("#image_svg").html(content);
                         	var svg = $('#image_svg').find('svg')[0];
 				svg.setAttribute('width', "100%");
@@ -171,15 +172,7 @@ function getImage () {
 				svg.setAttribute('viewBox', "-250 -150 3500 3500");
 				console.debug(svg);
 				console.debug(svg[0]);
-                        	clearInterval(refresh);
-        			
-				//$('svg text').on('click', function() {
-				//	$(this).css('fill', 'red');
-				//	$(this).css('font-size', '70px');
-				//});
-        			//$('svg path').on('hover', function() { // ideogram // outer
-        			//	$(this).css('fill', 'blue');
-        			//});
+                        	
 			}
         		
         }
@@ -203,11 +196,7 @@ $(document).ready(function() {
 
 		if ($("#emphasize").hasClass("active")) {
 			console.debug('emphasize')
-			$('svg text').on('click', function(){
-				$(this).addClass('emphasized');
-			});
-
-			/**
+			
 			//TEXT
 			$('svg text').on({
 				mouseover: function() {		
@@ -240,20 +229,21 @@ $(document).ready(function() {
 			$('svg lines').on('click hover', function() { 		//links 
 				$(this).css('stroke', 'red');
 				$(this).css('stroke-width', '7.0');
-			});**/
+			});
 		}
 	
 		else if ($("#hide").hasClass("active")) {
+
 			console.debug('hide')
-			$(this).addClass('emphasized');
-			/**$('svg text').on('click', function() {
+			
+			$('svg text').on('click', function() {
 				$(this).css('fill', 'white');
 				});
 			$('svg path').on('click', function() { // ideogram // outer
 				$(this).css('fill', 'white');
 				$(this).css('stroke', 'white');
 				
-			});**/
+			});
 		}	
 	});	
 });

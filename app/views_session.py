@@ -63,8 +63,9 @@ def registered():
   confirm = request.form['confirm']
   if password == confirm:
     #looking if another user already has these credentials
-    if User.query.filter_by(email=email).first() is not None or User.query.filter_by(password=password).first() is not None:
-      return redirect(url_for('error', template='register', error='Someone already has these credentials. Please use another email and/or password'))
+    if User.query.filter_by(email=email).first() is not None:
+      print 'email already used'
+      return redirect(url_for('error', template='register', error='This email was already used. Please try again with another email address'))
     else:
       #hashing the password
       hash = md5_crypt.encrypt(password)
@@ -85,7 +86,7 @@ def registered():
     if not os.path.exists(directory):
       os.makedirs(directory)
     return redirect(url_for('data'))
-  return redirect(url_for('error', template='register', error='Passwords do not match. Please fill in the registration form.'))
+  return redirect(url_for('error', template='register', error='Passwords do not match. Please try again'))
 
 
 #action

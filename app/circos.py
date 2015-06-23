@@ -18,12 +18,12 @@ USER = 'app/circos/usr'
 ########## BOTH #################
 #run circos
 def circos(path, unique):
-  print 'circos started'
+  print 'circos launched'
   user = authenticate()
   cmd_circos = '> process.txt; circos -conf %s -silent > %s/%s/%s/error.txt; rm process.txt' % (path, USER, user, unique) #using dummy method
   p = subprocess_cmd(cmd_circos)
   process['%s_circos' % (unique)] = p
-  print 'circos finished'
+
 
 
 ########## FROM DATA ############
@@ -42,7 +42,7 @@ def generate(unique, plots, links, values):
   #name of .svg file: circos_unique.svg
   with open('%s/%s/%s/specific.conf' % (USER, user, unique), 'a' ) as f:
     f.write('file*=circos_%s.svg\n' % (unique))
-    f.write('dir* = %s/%s/%s/image\n\n' % (USER, user, unique)) 
+    f.write('dir* = %s/%s/%s\n\n' % (USER, user, unique)) 
  
     #selectioning the appropriate karyotype: homo sapiens (default) or mouse 
     if values['karyotype'] == 'mm': 
@@ -91,7 +91,7 @@ def specific(unique):
     #name of the generated svg image
     f.write('file* = circos_%s.svg\n' % (unique))
     #location of the generated svg image
-    f.write('dir* = %s/%s/%s/image\n' % (USER, user, unique))
+    f.write('dir* = %s/%s/%s\n' % (USER, user, unique))
     #no png generated: only svg
     f.write('png* = yes\nsvg* = yes\n')
   print 'specific finished'

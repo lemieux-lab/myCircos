@@ -9,13 +9,15 @@
 	{% for unique in c_all %}
 	<div class="col-md-4">
 		<div class="thumbnail">
-			<img href="/get_info/{{ unique }}" src="{{ url_for('get_png', unique=unique) }}" height=30% width=30%></img> 
+			<a href="/display/{{ unique }}">
+				<img src="{{ url_for('get_png', unique=unique) }}" height=30% width=30%></img> 
+			</a>			
 			<div class="caption text-center">
 				<h4>Circos_{{ unique }}</h4>
 				<p></p>
 			</div>
 			<a href="/download/{{ unique }}/circos_{{ unique }}.svg" class="btn btn-primary " role="button">Download SVG</a>
-			<a href="/get_info/{{ unique }}" class="btn btn-primary pull-right " role="button">Details</a>
+			<a href="/display/{{ unique }}" class="btn btn-primary pull-right " role="button">Details</a>
 		</div>
 	</div>
 	{% endfor %}
