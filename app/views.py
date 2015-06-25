@@ -134,7 +134,7 @@ def index_data():
 
     #writing basic information
     with open(INFO, 'a' ) as f: 
-      f.write('Type: from data files\n\nDate: %s\nID: %s\nKaryotype: %s\nDensity: %s\nDescription: %s\n\n' % (datetime.date.today(), unique, values['karyotype'], values['density'], request.values['comments']))
+      f.write('Type: data file(s)\nDescription: %s\n\nDate: %s\nID: %s\nKaryotype: %s\nDensity: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, values['karyotype'], values['density']))
     
     links_file = request.files['links_file'] #get the links file by its name
 
@@ -240,7 +240,7 @@ def index_data():
     #generating the configuration files and the image
     generate(unique=unique, plots=plots, links=links, values=values)
     circos('%s/circos.conf' % (TASK), unique) 
-    return redirect(url_for('circos_display', unique=unique))
+    return redirect(url_for('circos_display', type='data', unique=unique))
   return redirect(url_for('error', template='index_data', error='An error occured while loading your file(s). Please try again'))
    
 
@@ -255,8 +255,9 @@ def index_config():
   unique = maintenance()
   user = authenticate()
   INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
-  DATA = '%s/%s/%s/data' % (USER, user, unique)
-  CIR_CONF = '%s/%s/%s/data/circos.conf' % (USER, user, unique)
+  TASK = '%s/%s/%s' % (USER, user, unique)
+  CIR_CONF = '%s/%s/%s/circos.conf' % (USER, user, unique)
+  PNG = '%s/%s/%s/circos_%s.png' % (USER, user, unique,unique)
   
   if request.method == 'POST': 
     folder = request.files['config']
@@ -265,7 +266,7 @@ def index_config():
       file_upload(folder, unique)
       folder_filename = secure_filename(folder.filename)
       #path to the uploaded folder
-      data = '%s/%s' % (DATA, folder_filename)
+      data = '%s/%s' % (TASK, folder_filename)
 
       #unpacking data
       if tarfile.is_tarfile(data):
@@ -279,8 +280,8 @@ def index_config():
 	circos(CIR_CONF, unique)
 	#writing info.txt
 	with open(INFO, 'a' ) as f:
-	  f.write('Type: from configuration files\n\nDate: %s\nID: %s\nDescription: %s\n\n' % (datetime.date.today(), unique, request.values['comments']))
-        return redirect(url_for('circos_display', unique=unique))
+	  f.write('Type: configuration files\nDescription: %s\n\nDate: %s\nID: %s\nZIP: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, folder_filename))
+	return redirect(url_for('circos_display', type='configuration', unique=unique))
       else:
 	return redirect(url_for('error', template='index_config', error='No circos.conf found. Please define your main configuration file as circos.conf.'))	      
     return redirect(url_for('error', template='index_config', error='File(s) missing or with wrong extension. Please upload your files.'))
@@ -292,9 +293,9 @@ def index_config():
 ##	     DISPLAY	 	  ##
 ##				  ##
 ####################################
-@app.route('/circos_display/<unique>', endpoint='circos_display')
+@app.route('/circos_display/<type>/<unique>', endpoint='circos_display')
 @login_required
-def circos_display(unique):
+def circos_display(type, unique):
   user = authenticate()
   LEGEND = '%s/%s/%s/legend.txt' % (USER, user, unique)
   TASK = '%s/%s/%s' % (USER, user, unique)
@@ -306,10 +307,7 @@ def circos_display(unique):
     lines_legend = legend(unique)
   else:
     lines_legend = []
-  #look if circos.zip can be downloaded
-  files = os.listdir(TASK)
-  print files
-  return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, files=files)
+  return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, type=type)
 
 
 ####################################
@@ -322,7 +320,7 @@ def circos_display(unique):
 def get_svg(unique):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
-  DATA = '%s/%s/%s/data' % (USER, user, unique)
+  INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
   SVG = '%s/%s/%s/circos_%s.svg' % (USER, user, unique, unique)
   PNG = '%s/%s/%s/circos_%s.png' % (USER, user, unique,unique)
   content = '' 
@@ -358,13 +356,17 @@ def get_svg(unique):
       if os.path.isfile(SVG): 
        file_ready(SVG)
        content = open(SVG).read()
-       #copy files into task folder
-       if os.path.exists('%s/specific.conf' % (DATA)):
-         shutil.copy('%s/specific.conf' % (DATA), TASK)
-       #erase tmp 
-       shutil.rmtree(DATA)
-       #create circos.zip
-       zip_circos(unique)
+       with open(INFO, 'r') as i:
+         type = i.readline()
+       if 'data' in type:
+         #create circos.zip
+         zip_circos(unique)
+       elif 'configuration' in type:
+         #cleaning task folder
+         files = os.listdir(TASK)
+         for f in files:
+           if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f):
+	     os.remove('%s/%s/%s/%s' % (USER, user, unique, f))
        #save circos into db
        if current_user.is_authenticated():
          circos = Circos(svg='%s' % (unique), user_id=current_user.id)

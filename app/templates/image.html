@@ -35,9 +35,9 @@
     						<li><a href="/download/{{ unique }}/circos_{{ unique }}.svg">Circos.svg</a></li>
 						
 
-						{% if 'specific.conf' in files or 'circos.zip' in files %}
+						{% if 'data' in type %}
     						<li><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
-						{% else %}
+						{% elif 'configuration' in type %}
 						<li class='disabled'><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
 						{% endif %}
 					</ul>

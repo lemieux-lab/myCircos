@@ -30,9 +30,6 @@ def maintenance():
   directory = '%s/%s/%s' % (USER, user, unique)
   if not os.path.exists(directory):
     os.makedirs(directory)
-    #tmp
-    tmp_data = '%s/%s/%s/data' % (USER, user, unique)
-    os.makedirs(tmp_data)
     shutil.copy('%s/circos.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
   else:
     maintenance()

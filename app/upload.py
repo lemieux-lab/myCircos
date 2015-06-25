@@ -22,7 +22,7 @@ def allowed_file(filename):
 def file_upload(file, unique):
   user = authenticate()
   filename = secure_filename(file.filename)
-  file.save(os.path.join('%s/%s/%s/data' % (USER, user, unique), filename))
+  file.save(os.path.join('%s/%s/%s/' % (USER, user, unique), filename))
 
 #unpacking .tar and .tar.gz
 def un_tar(data, unique):
@@ -32,11 +32,11 @@ def un_tar(data, unique):
     t = tarfile.open(data, 'r:gz')
   else:
     t = tarfile.open(data, 'r')
-  t.extractall('%s/%s/%s/data' % (USER, user, unique))
+  t.extractall('%s/%s/%s' % (USER, user, unique))
 
 #unpacking .zip
 def un_zip(data, unique):
   print 'unpacking zip folder'
   user = authenticate()
   z = zipfile.ZipFile(data, "r") 
-  z.extractall('%s/%s/%s/data' % (USER, user, unique))
+  z.extractall('%s/%s/%s' % (USER, user, unique))

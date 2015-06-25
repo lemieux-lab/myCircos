@@ -87,11 +87,11 @@ def generate(unique, plots, links, values):
 def specific(unique):
   print 'starting specific'
   user = authenticate()
-  with open('%s/%s/%s/data/circos.conf' % (USER, user, unique), 'a' ) as f:
+  with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'a' ) as f:
     #name of the generated svg image
-    f.write('file* = circos_%s.svg\n' % (unique))
+    f.write('file** = circos_%s.svg\n' % (unique))
     #location of the generated svg image
-    f.write('dir* = %s/%s/%s\n' % (USER, user, unique))
+    f.write('dir** = %s/%s/%s\n' % (USER, user, unique))
     #no png generated: only svg
     f.write('png* = yes\nsvg* = yes\n')
   print 'specific finished'
