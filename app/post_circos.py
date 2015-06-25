@@ -20,7 +20,7 @@ def zip_circos(unique):
   print 'making zip file'
   user = authenticate()
  
-  zip_file = zipfile.ZipFile('%s/%s/%s/circos_%s.zip' % (USER, user, unique, unique), "w")
+  zip_file = zipfile.ZipFile('%s/%s/%s/circos.zip' % (USER, user, unique), "w")
   task_folder = '%s/%s/%s' % (USER, user, unique)
   files = os.listdir(task_folder)
   for f in files:

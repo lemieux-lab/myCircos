@@ -308,6 +308,7 @@ def circos_display(unique):
     lines_legend = []
   #look if circos.zip can be downloaded
   files = os.listdir(TASK)
+  print files
   return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, files=files)
 
 
@@ -378,22 +379,18 @@ def get_svg(unique):
 ##	      DOWNLOAD	 	  ##
 ##				  ##
 ####################################
-@app.route('/download/<unique>/<file>', endpoint='download')
+@app.route('/download/<unique>/<to_download>', endpoint='download')
 @login_required
 def download(unique, to_download):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
 
-  try:
-    content = open('%s/%s' % (TASK, to_download)).read()
-    response = make_response(content)
-    response.headers["content-Type"] = "application/octet-stream" 
-    response.headers["content-Disposition"] = "attachment; filename = %s" % (to_download)
-    return response
-  except Exception, e:
-    print 'There was an error while downloading ' + to_download + ': ' + e
-    return render_template('mycircos.html')
-
+  content = open('%s/%s' % (TASK, to_download)).read()
+  response = make_response(content)
+  response.headers["content-Type"] = "application/octet-stream" 
+  response.headers["content-Disposition"] = "attachment; filename = %s" % (to_download)
+  return response
+  
 
 ####################################
 ##				  ##

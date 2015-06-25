@@ -7,7 +7,7 @@
 <center><h3>Karyotype</h3></center>
 <p>You can either have a <b>Homo sapiens</b> or a <b>mouse</b> karyotype.</p>
 <p>You also have the option to use the entire karyotype or only some chromosomes. It the latter case, please follow the proper orthograph, as demonstrated:</p>
-<p><pre><b>/chr[1-4]$/</b> would diplay chromosomes 1, 2, 3 and 4 <br><b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br><b>/chr[1-4]$/;chr6;chr9</b> would display chromosomes 1, 2, 3, 4, 6 and 9</pre></p>
+<p><pre><b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br></pre></p>
 <p>Any changes will cause Circos to fail.</p>
 
 <center><h3>Labels</h3></center>
@@ -52,31 +52,29 @@
 			<div class="col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-heading">
-						<h3 class="panel-title">Karyotype</h3>
+						<h3 class="panel-title">Karyotype - Ideogram</h3>
 					</div>
 					<div class="panel-body">
 						<!-- selecting karyotype: default is set to hs-->	
 						<div class="row">
 							<div class="col-md-6">
-								<input type='radio' name='karyotype' value='hs' checked>Homo sapiens
+								<input type='radio' name='karyotype' value='hs' checked>&nbspHomo sapiens <br>&nbsp&nbsp&nbsp&nbsp<em>hg19</em>
 							</div>
 							<div class="col-md-6">
-								<input type='radio' name='karyotype' value='mm'>Mouse
+								<input type='radio' name='karyotype' value='mm'>&nbspMouse <br>&nbsp&nbsp&nbsp&nbsp<em>mm9</em>
 							</div>
 						</div>
 						<!-- specific chromosome(s) display -->
 						<div class="row">
 							<div class="col-md-12">
-								<label for="chr">By default, the entire karyotype will be displayed. I you want only specific chromosome please enter them here:</label>
+								<label for="chr"><br>By default, the entire karyotype will be displayed. If you only want specific chromosome, please enter them here:</label>
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-1">
 							</div>
 							<div class="col-md-11">
-								E.g. <b>/chr[1-4]$/</b> would diplay chromosomes 1, 2, 3 and 4 <br>
-								E.g. <b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br>
-								E.g. <b>/chr[1-4]$/;chr6;chr9</b> would display chromosomes 1, 2, 3, 4, 6 and 9<br><br>
+								E.g. <b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br><br>
 							</div>
 						</div>
 						<div class="row">

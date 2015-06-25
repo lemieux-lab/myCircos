@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-
-{% block header %}
-<h1>Not found <span class="label label-danger">Error</span></h1>
-{% endblock %}
-
-{% block content %}
-<h4>The requested URL was not found on the server.<br> If you entered the URL manually, please check your spelling and try again.<br></h4>
-{% endblock %}

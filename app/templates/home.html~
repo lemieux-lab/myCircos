@@ -19,7 +19,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<br>
-					<p>This interface aims to be a user-friendly tool when doing circular data visualisation, a.k.a Circos.  There is no need in downloading or installing the Circos software package: the user only have to upload his file(s), select some parameters and click on <em>Generate</em>. The interface will keep track of all generated images their assossiated details. Therefore, when logged in, the user can access a database of his own Circos.</p><br>
+					<p>This interface aims to be a user-friendly tool when doing circular data visualisation, a.k.a Circos.  There is no need in downloading or installing the Circos software package: the user only have to upload his/her file(s), select some parameters if needed and click on <em>Generate</em>. The interface will keep track of all generated images and their assossiated details. Therefore, when logged in, the user can access a database of his/her own Circos.</p><br>
 					<p><blockquote>Circos can be used to display any kind of information. It's particularly suitable for layering different data sets to create highly informative infographics with texture and visual appeal.<br> <p align="right"><em>- M. Krzywinski</em></p></blockquote></p> <br>
 					<p>The user can either upload indivual data files, which will represent track(s), links or labels on the final image, or a zip/tar package. The Circos generated can then be downloaded, as well as the configuration package specific to it. The image is outputted as a SVG and therefore can be modified in any image manipulation programs. Directive and tips are listed under the Help option in the menu bar.</p>
 					<p>For more information about Circos, the user can refer to their <a href="http://circos.ca/" class="alert-link">website</a></p>
@@ -40,8 +40,10 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-			<div class="login" style="margin-left: auto; margin-right: auto; width: 60%;">
+			<div class="circos" style="margin-left: auto; margin-right: auto; width: 60%;">
 					{% include "circos_image.html" %}
+					<br>
+					<center><em>Circos generated from data files by the application</em></center>
 			</div>
 			</div>
 		</div>

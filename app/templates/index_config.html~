@@ -12,8 +12,8 @@
   <li><font color="#6495ED">karyotype.conf</font>: file with the desired karyotype</li>
  <li><font color="#6495ED">.txt</font>: all the data files needed for your track(s), links and/or labels. 
 </ul></p>
-<p>Every file need to be formmatted according to the Circos conventions. When writing the path to one of your data files, just write the name of the file.</p>
-<p><pre>&ltplots&gt<br>  ...<br>  &ltplot&gt<br>    type  = histogram<br>    file  = hist1.txt<br>    ...<br>  &lt/plot&gt<br>  &lt/plots&gt</pre></p>
+<p>Every file need to be formmatted according to the Circos conventions. When writing the path to one of your data files, only write its name, no path needed.</p>
+<p><pre>&ltplots&gt<br>  ...<br>  &ltplot&gt<br>    type  = histogram<br>    file  = hist1.txt<br>    ...<br>  &lt/plot&gt<br>&lt/plots&gt</pre></p>
 <p>Please do not use sub-folder(s) in your package: only multiple single files.</p>
 {% endblock %}
 
@@ -45,7 +45,7 @@
 					<h3 class="panel-title">Files</h3>
  				</div>
   				<div class="panel-body">
-					<label for="config">.tar or .zip</label><br>
+					<label for="config">.tar/.tar.gz or .zip</label><br>
 					<input type='file' name="config">
 				</div>
 			</div>

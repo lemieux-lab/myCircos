@@ -36,9 +36,9 @@
 						
 
 						{% if 'specific.conf' in files or 'circos.zip' in files %}
-    						<li><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
+    						<li><a href="/download/{{ unique }}/circos_{{ unique }}.zip">Circos.zip</a></li>
 						{% else %}
-						<li class='disabled'><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
+						<li class='disabled'><a href="/download/{{ unique }}/circos_{{ unique }}.zip">Circos.zip</a></li>
 						{% endif %}
 					</ul>
 					<a href="/delete/{{ unique }}" class="btn btn-danger pull-right" role='button'>Delete</a>
@@ -164,7 +164,7 @@ function getImage () {
 			}
 
  	   		else {  
-				clearInterval(refresh);
+				
 				$("#image_svg").html(content);
                         	var svg = $('#image_svg').find('svg')[0];
 				svg.setAttribute('width', "100%");
@@ -172,6 +172,7 @@ function getImage () {
 				svg.setAttribute('viewBox', "-250 -150 3500 3500");
 				console.debug(svg);
 				console.debug(svg[0]);
+				clearInterval(refresh);
                         	
 			}
         		
