@@ -18,45 +18,87 @@
 {% endblock %}
 
 {% block header %}
-<h1> Upload configuration file(s) <small>.tar or .zip 
+<h1> Upload configuration package <small>.tar, .tar.gz, .zip</small></hi> 
 {% endblock %}
 
 {% block content %}
 <form action="/index_config" method="post"  enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-6">
-			<!-- personal notes from the user -->
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">Description</h3>
+			<div class="row">
+				<!-- personal notes from the user -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Description</h3>
+					</div>
+					<div class="panel-body">
+						<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
+					</div>
 				</div>
-				<div class="panel-body">
-					<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
 			</div>
-		</div>
-		</div>
-	</div>
 	
-	<div class="row">	
-		<div class="col-md-6">
-			<!-- configuration file -->
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">Files</h3>
- 				</div>
-  				<div class="panel-body">
-					<label for="config">.tar/.tar.gz or .zip</label><br>
-					<input type='file' name="config">
+			<div class="row">	
+				<!-- configuration file -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Package</h3>
+		 			</div>
+		  			<div class="panel-body">
+						<label for="config">.tar/.tar.gz or .zip</label><br>
+						<input type='file' name="config">
+					</div>
 				</div>
 			</div>
-		</div>
-	</div>
 
-	<div class="row">
-		<div class="col-md-6">
-			<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
+			<div class="row">
+				<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
 				<br><br>
-			<br><br>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div> 
+		<div class="col-md-6">
+ 			<!-- Nav tabs -->
+  			<ul class="nav nav-tabs" role="tablist">
+    				<li role="presentation" class="active"><a href="#HowTo" aria-controls="home" role="tab" data-toggle="tab">How to...</a></li>
+				<li role="presentation"><a href="#histogram" aria-controls="profile" role="tab" data-toggle="tab">Histogram</a></li>
+				<li role="presentation"><a href="#scatter" aria-controls="messages" role="tab" data-toggle="tab">Scatter Plot</a></li>
+				<li role="presentation"><a href="#axis" aria-controls="settings" role="tab" data-toggle="tab">Axis</a></li>
+				<li role="presentation"><a href="#heatmap" aria-controls="settings" role="tab" data-toggle="tab">Heatmap</a></li>
+				<li role="presentation"><a href="#tiles" aria-controls="settings" role="tab" data-toggle="tab">Tiles</a></li>
+				<li role="presentation"><a href="#labels" aria-controls="settings" role="tab" data-toggle="tab">Labels</a></li>
+				<li role="presentation"><a href="#links" aria-controls="settings" role="tab" data-toggle="tab">Links</a></li>
+  			</ul>
+
+ 	 		<!-- Tab panes -->
+  			<div class="tab-content">
+    				<div role="tabpanel" class="tab-pane active" id="Howto">
+					<br>
+					<h4><center><font color="#0088cc">How to...</font> Personalize circos.zip</center></h3>
+					<p>Here are some tips on how you can modify the <em>circos.zip</em> package  downloaded when generating a Circos from data file(s). </p>	
+				</div>
+    				<div role="tabpanel" class="tab-pane" id="histogram">
+					Orientation, Color
+				</div>
+    				<div role="tabpanel" class="tab-pane" id="scatter">
+					color, glyph
+				</div>
+    				<div role="tabpanel" class="tab-pane" id="axis">
+					differentiation of negative and positive
+				</div>
+				<div role="tabpanel" class="tab-pane" id="heatmap">
+					colors scheme
+				</div>
+				<div role="tabpanel" class="tab-pane" id="tiles">
+					...
+				</div>
+				<div role="tabpanel" class="tab-pane" id="labels">
+					...	
+				</div>
+				<div role="tabpanel" class="tab-pane" id="links">
+					...
+				</div>
+  			</div>
 		</div>
 	</div>
 </form>

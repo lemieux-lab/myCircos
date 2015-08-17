@@ -5,7 +5,8 @@
 ####################################################
 #functions most often used
 
-import subprocess
+import os, os.path
+import subprocess, shutil
 from subprocess import Popen, PIPE
 from flask.ext.login import current_user
 
@@ -23,4 +24,13 @@ def authenticate():
 def image(img):
   path = 'image/%s' % img
   return send_file(path, mimetype='image/png')
+
+#copy directory
+def copy_dir(from_path, dir, to_path):
+  user = authenticate()
+  #os.makedirs('%s/%s' % (to_path, dir))
+  to_copy = os.listdir(from_path)
+  for f in to_copy:
+     shutil.copy('%s/%s' % (from_path, f), '%s' % (to_path))
+  
 

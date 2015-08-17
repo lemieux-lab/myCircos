@@ -8,13 +8,10 @@
 		{% endif %}
 
 		{% block head %}{% endblock %}
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    		<!-- Optional theme -->
-    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+		<!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
    		<!-- <link rel="stylesheet" href="/static/css/main.css">-->
 
 		<style>
@@ -39,9 +36,12 @@
 		    				<ul class="dropdown-menu">
 		       			 	<li><a href="/generate/data"> From data files </a></li>
 		        			<li><a href="/generate/config"> From configuration files </a></li>
+						<li><a href="/generate/tabular"> From tabular data </a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="/generate/tabular"> Personalize your Circos</a></li>
 						</ul>
 	       				</li>
-					<li><a class="navbar-brand" href="/mycircos"><span class="glyphicon glyphicon-folder-open"></span> MyCircos </a></li>
+					<li><a class="navbar-brand" href="/mycircos"><span class="glyphicon glyphicon-folder-open"></span> myCircos </a></li>
 				
 	    			</ul>
 				<ul class="nav navbar-nav pull-right">

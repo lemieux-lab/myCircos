@@ -7,7 +7,7 @@
 <center><h3>Karyotype</h3></center>
 <p>You can either have a <b>Homo sapiens</b> or a <b>mouse</b> karyotype.</p>
 <p>You also have the option to use the entire karyotype or only some chromosomes. It the latter case, please follow the proper orthograph, as demonstrated:</p>
-<p><pre><b>/chr[1-4]$/</b> would diplay chromosomes 1, 2, 3 and 4 <br><b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br><b>/chr[1-4]$/;chr6;chr9</b> would display chromosomes 1, 2, 3, 4, 6 and 9</pre></p>
+<p><pre><b>chr1;chr6;chr9</b> would display chromosomes 1, 6 and 9<br></pre></p>
 <p>Any changes will cause Circos to fail.</p>
 
 <center><h3>Labels</h3></center>
@@ -17,10 +17,12 @@
 <center><h3>Links</h3></center>
 <p>Labels will be displayed as the largest and innermost track of your Circos. You can give a brief name/description to your links. Only <b>.txt</b> are accepted and they must be correctly formatted: </p>
 <p><font color="#6495ED"><pre>#from	start	end	#to	start	end</font><br>...<br>chr1	400	550	chr3	500	750</pre></p>
+<p><em>When displaying links, it is recommanded to show no more than 4 tracks (including the gene density track). Otherwise, tracks may overlap.</em></p>
 
 <center><h3>Tracks</h3></center>
-<p>The data used to generate the <b>Gene Density</b> histogram is from the <b>UCSC Genome Browser</b>. You can add and remove as many tracks as you want. For each one, you must choose a graphical representation (<em>histogram, heat plot, scatter plot or tiles</em>) and upload a <b>.txt</b> file. You can also give each track its own name, which could useful for future reference. Again, the submitted file must be correctly formatted: </p>
+<p>The data used to generate the <b>Gene Density</b> histogram is from the <b>UCSC Genome Browser</b> (500kb). You can add and remove as many tracks as you want. For each one, you must choose a graphical representation (<em>histogram, heat plot, scatter plot or tiles</em>) and upload a <b>.txt</b> file. You can also give each track its own name, which could useful for future reference. Again, the submitted file must be correctly formatted: </p>
 <p><font color="#6495ED"><pre>#chr	start	end	value</font><br>...<br>chr19	305575	344791	3.11363</pre></p><br>
+<p><em>It is recommanded to show no more than 5 tracks (including the gene density track). Otherwise, tracks may overlap.</em></p>
 <p>For more information on how to format your data files, please refer to the Circos <a href="http://circos.ca/documentation/tutorials/" class="alert-link">tutorials</a>.</p>
 
 {% endblock %}
@@ -61,13 +63,13 @@
 								<input type='radio' name='karyotype' value='hs' checked>&nbspHomo sapiens <br>&nbsp&nbsp&nbsp&nbsp<em>hg19</em>
 							</div>
 							<div class="col-md-6">
-								<input type='radio' name='karyotype' value='mm'>&nbspMouse <br>&nbsp&nbsp&nbsp&nbsp<em>mm9</em>
+								<input type='radio' name='karyotype' value='mm'>&nbspMouse <br>&nbsp&nbsp&nbsp&nbsp<em>mm10</em>
 							</div>
 						</div>
 						<!-- specific chromosome(s) display -->
 						<div class="row">
 							<div class="col-md-12">
-								<label for="chr"><br>By default, the entire karyotype will be displayed. If you only want specific chromosome, please enter them here:</label>
+								<label for="chr"><br>By default, the entire karyotype will be displayed. If you only want specific chromosomes, please enter them here:</label>
 							</div>
 						</div>
 						<div class="row">
@@ -115,6 +117,9 @@
 										<input type='file' id="links_file" name='links_file'>
 									</div>
 								</div>
+								<div class="row">
+									<font size="2"><em>&nbsp&nbspWhen displaying links, it is recommanded to show no more than 4 tracks (including the gene density track). &nbsp&nbspOtherwise, tracks may overlap.</em></font>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -144,10 +149,10 @@
 									<label for="density">Would you like to display a histogram of genes density as your first track?</label><br>
 									<div class="row">
 										<div class="col-md-6">
-						       					<input type='radio' name='density' value='yes' checked>Display
+						       					<input type='radio' name='density' value='yes' checked>&nbspDisplay
 						      				</div>
 										<div class="col-md-6">
-						       					<input type='radio' name='density' value='no'>Don't display
+						       					<input type='radio' name='density' value='no'>&nbspDon't display
 										</div>
 									</div>
 					       			</div>
@@ -197,7 +202,7 @@
 var i = 1;
 	$(document).ready(function() {
 		$("#add").click(function () {
-			$("<div class='added' id='track'><div class='row'><div class='col-md-10'><div class='panel panel-default'><div class='panel-heading'><div class='row'><div class='col-md-6'><input type='text' class='form-control input-sm' placeholder='Track name' id='name"+i+"' name='name"+i+"'></div></div></div><div class='panel-body'><div class='row'><div class='col-md-4'><label for='graph'>Graphical representation</label><br><select name='graph"+i+"' id='graph"+i+"'><option value='histogram'>Histograms</option><option value='scatter'>Scatter Plots</option><option value='heatmap'>Heat Maps</option><option value='tile'>Tiles</option></select></div><div class='col-md-3'><label for='orientation'>Orientation</label><br><select name='orientation"+i+"' id='orientation"+i+"'><option value='out'>Out</option><option value='in'>In</option></select></div><div class='col-md-5'><label for='data'>Data</label><input type='file' id='file"+i+"' name='file"+i+"'></div></div></div></div></div><div class='col-md-2'><button class='remove btn btn-default pull-right btn-sm' type='button'><span class='glyphicon glyphicon-trash'></span></button></div></div></div>").appendTo('.add_track');
+			$("<div class='added' id='track'><div class='row'><div class='col-md-10'><div class='panel panel-default'><div class='panel-heading'><div class='row'><div class='col-md-6'><input type='text' class='form-control input-sm' placeholder='Track name' id='name"+i+"' name='name"+i+"'></div></div></div><div class='panel-body'><div class='row'><div class='col-md-4'><label for='graph'>Graphical representation</label><br><select name='graph"+i+"' id='graph"+i+"'><option value='histogram'>Histogram</option><option value='scatter'>Scatter Plot</option><option value='heatmap'>Heat Map</option><option value='tile'>Tiles</option></select></div><div class='col-md-3'><label for='orientation'>Orientation</label><br><select name='orientation"+i+"' id='orientation"+i+"'><option value='out'>Out</option><option value='in'>In</option></select></div><div class='col-md-5'><label for='data'>Data</label><input type='file' id='file"+i+"' name='file"+i+"'></div></div></div></div></div><div class='col-md-2'><button class='remove btn btn-default pull-right btn-sm' type='button'><span class='glyphicon glyphicon-trash'></span></button></div></div></div>").appendTo('.add_track');
 			i++;
 			console.debug(i);
 	    		});

@@ -24,7 +24,8 @@ def zip_circos(unique):
   task_folder = '%s/%s/%s' % (USER, user, unique)
   files = os.listdir(task_folder)
   for f in files:
-    if ('.conf' in f or '.txt' in f) and ('error' not in f) and ('info' not in f) and ('legend' not in f):
+
+    if ('.conf' in f or '.txt' in f) and ('info' not in f) and ('legend' not in f):
       zip_file.write('%s/%s/%s/%s' % (USER, user, unique, f), f)
       os.remove('%s/%s/%s/%s' % (USER, user, unique, f)) 
   zip_file.close() 
@@ -42,7 +43,7 @@ def logs(unique):
         f1.write('\n')
 
 #sending notification to the user
-def send_email(unique):
+def send_email(unique, type):
   print 'sending email'
   no_reply = 'circos@binfo09.iric.ca'
   user = authenticate()
@@ -55,7 +56,7 @@ def send_email(unique):
   msg['From'] = no_reply
   msg['To'] = user
 
-  message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s' % (host, unique)
+  message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s/%s' % (host, type, unique)
   msg.attach(MIMEText(message, 'plain'))
 
   try:

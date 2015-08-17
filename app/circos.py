@@ -58,40 +58,48 @@ def generate(unique, plots, links, values):
     if plots:
      shutil.copy('%s/plots.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
      shutil.copy('%s/axis.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
+     shutil.copy('%s/svg_rule_track.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
      #graphical representation 
      f.write('<plots>\n')
      f.write('<<include plots.conf>>\n')
      for k,v in plots.items():
        f.write('<plot>\n')
+       f.write('svgclass = %s\n' % (v['type']))
        for sk, sv in v.items():
          f.write('%s = %s\n' % (sk, sv))
-         if 'histogram' in sv or 'scatter' in sv:
+         if (sv == 'histogram') or (sv == 'scatter'):
            f.write('<<include axis.conf>>\n')
+       f.write('<rules>\n<<include svg_rule_track.conf>>\n</rules>\n')
        f.write('</plot>\n\n')
      f.write('</plots>\n\n')
 
     #links 
     if links:
+      shutil.copy('%s/svg_rule_link.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
       f.write('<links>\n')
       for k,v in links.items():
         f.write('<link>\n')
         for sk, sv in v.items():
           f.write('%s = %s\n' % (sk, sv))
+	f.write('<rules>\n<<include svg_rule_link.conf>>\n</rules>\n')
         f.write('</link>\n\n')
       f.write('</links>\n\n')
   print 'generate finished'
 
 
-########## FROM CONFIG ##########
+########## FROM CONFIG + TABULAR ##########
 #specificy location and name of svg file
 def specific(unique):
   print 'starting specific'
   user = authenticate()
-  with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'a' ) as f:
+  with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'r+b' ) as f:
+    #look if already specify
+    parameters = f.readlines()
+    for p in parameters:
+      if ('file' in p) or ('dir' in p):
+        parameters.remove(p)
     #name of the generated svg image
-    f.write('file** = circos_%s.svg\n' % (unique))
+    f.write('\nfile** = circos_%s.png\n' % (unique))
     #location of the generated svg image
     f.write('dir** = %s/%s/%s\n' % (USER, user, unique))
-    #no png generated: only svg
-    f.write('png* = yes\nsvg* = yes\n')
   print 'specific finished'

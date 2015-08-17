@@ -1,7 +1,8 @@
 from __future__ import division
 import os, os.path
 from flask import render_template, redirect, url_for, request, send_from_directory, send_file, jsonify, make_response, session, g
-import requests 
+import requests, sys, json
+import re
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from werkzeug import secure_filename
 from app import app, db, lm, models
@@ -12,6 +13,7 @@ from views_session import *
 from util import *
 from task import *
 from upload import *
+from svg import *
 from circos import *
 from display import *
 from post_circos import *
@@ -106,6 +108,26 @@ def config():
 
 ####################################
 ##				  ##
+##	    TABULAR FORM	  ##
+##				  ##
+####################################
+@app.route('/generate/tabular', endpoint='tabular')
+@login_required
+def tabular():
+  return render_template('index_tabular.html', title='Circos-Tabular')
+
+####################################
+##				  ##
+##	 HOW TO PERSONALIZE	  ##
+##				  ##
+####################################
+@app.route('/howTo/personalize', endpoint='personalize')
+@login_required
+def personalize():
+  return render_template('personalize.html', title='How to... Personalize')
+
+####################################
+##				  ##
 ##	  GENERATE DATA	 	  ##
 ##				  ##
 ####################################
@@ -124,6 +146,9 @@ def index_data():
   links = collections.OrderedDict()
   values = {}
 
+  #main configuraiton file
+  shutil.copy('%s/circos.conf' % (CONF), '%s/%s/%s' % (USER, user, unique))
+
   if request.method == 'POST':
     all_values = request.form #list of every values (no files)
     ids = track_list(all_values)
@@ -134,7 +159,7 @@ def index_data():
 
     #writing basic information
     with open(INFO, 'a' ) as f: 
-      f.write('Type: data file(s)\nDescription: %s\n\nDate: %s\nID: %s\nKaryotype: %s\nDensity: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, values['karyotype'], values['density']))
+      f.write('Type: Data file(s)\nDescription: %s\n\nDate: %s\nID: %s\nKaryotype: %s\nDensity: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, values['karyotype'], values['density']))
     
     links_file = request.files['links_file'] #get the links file by its name
 
@@ -194,8 +219,8 @@ def index_data():
       #writing info.txt
       with open('%s/legend.txt' % (TASK), 'a' ) as l:
         l.write('Track 1: Gene Density\n')
-      shutil.copy('%s/gene_density.txt' % (CONF), TASK)
-      plots['density'] = {'file': 'gene_density.txt', 'type': 'histogram', 'orientation': 'in', 'r1': str(start) + 'r', 'r0': str(start - width) + 'r', 'fill_color': 'grey'}
+      shutil.copy('%s/%s.txt' % (CONF,values['karyotype']), TASK)
+      plots['density'] = {'file': '%s.txt' % (values['karyotype']), 'type': 'histogram', 'orientation': 'in', 'r1': str(start) + 'r', 'r0': str(start - width) + 'r', 'fill_color': 'grey', 'max': 50, 'min': 0}
     else:
       track_radius = start
     #label track
@@ -232,7 +257,7 @@ def index_data():
           l.write('Track %s: %s\n' % (t, track_title))
           t = t + 1
         #plots dictionary
-        plots[track] = {'file': track_filename, 'type': request.form[graph], 'orientation': request.form[orientation], 'r1': str(track_radius) + 'r', 'r0': str(track_radius - width) + 'r'}
+        plots[track] = {'file': track_filename, 'type': request.form[graph], 'orientation': request.form[orientation], 'r1': str(track_radius) + 'r', 'r0': str(track_radius - width) + 'r', 'fill_color': 'white'}
         track_radius = track_radius - width - pad
       else:
 	return redirect(url_for('error', template='index_data', error='Track file(s) missing or with wrong extension. Please upload your files.'))    
@@ -254,10 +279,10 @@ def index_data():
 def index_config():
   unique = maintenance()
   user = authenticate()
+  CONF = 'app/circos'
   INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
   TASK = '%s/%s/%s' % (USER, user, unique)
   CIR_CONF = '%s/%s/%s/circos.conf' % (USER, user, unique)
-  PNG = '%s/%s/%s/circos_%s.png' % (USER, user, unique,unique)
   
   if request.method == 'POST': 
     folder = request.files['config']
@@ -274,18 +299,148 @@ def index_config():
       elif zipfile.is_zipfile(data):
         un_zip(data, unique)
 
+      #allow interactivity
+      shutil.copy('%s/svg_rule_track.conf' % (CONF), TASK)
+      shutil.copy('%s/svg_rule_link.conf' % (CONF), TASK)
+      file_conf = os.listdir(TASK)
+      print(file_conf)
+      for fc in file_conf:
+        if ('.conf' in fc):
+	  svg('%s/%s' % (TASK, fc))
+
       #look for circos.conf
       if os.path.exists(CIR_CONF):
+        print 'specific conf'
 	specific(unique)
 	circos(CIR_CONF, unique)
 	#writing info.txt
 	with open(INFO, 'a' ) as f:
-	  f.write('Type: configuration files\nDescription: %s\n\nDate: %s\nID: %s\nZIP: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, folder_filename))
+	  f.write('Type: Configuration files\nDescription: %s\n\nDate: %s\nID: %s\nZIP: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, folder_filename))
 	return redirect(url_for('circos_display', type='configuration', unique=unique))
       else:
 	return redirect(url_for('error', template='index_config', error='No circos.conf found. Please define your main configuration file as circos.conf.'))	      
     return redirect(url_for('error', template='index_config', error='File(s) missing or with wrong extension. Please upload your files.'))
   return redirect(url_for('error', template='index_config', error='An error occured while uploading your files. Please upload your files.'))
+
+
+####################################
+##				  ##
+##	  GENERATE TABULAR	  ##
+##				  ##
+####################################
+@app.route('/index_tabular', methods=['GET', 'POST'], endpoint='index_tabular')
+@login_required
+def index_tabular():
+  unique = maintenance()
+  user = authenticate()
+  TASK = '%s/%s/%s' % (USER, user, unique)
+  INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
+  parse_table = '%s/parse-table.conf' % (TASK)
+  color_conf = '%s/color.conf' % (TASK)
+  to_parse = '%s/to_parse.txt' % (TASK)
+
+  #main configuration files
+  copy_dir('%s/tabular/etc' % (CONF), 'etc', '%s/%s/%s/' % (USER, user, unique))
+    
+  if request.method == 'POST':
+    table = request.files['tabular']
+    color = request.values['color']
+    normal = request.values['normal']
+    links = request.values['links']
+    min_val = request.values['min']
+    sym = request.values['sym']
+    link_color = '%s/%s.conf' % (TASK, links)
+    
+    print links
+    #looking for value range
+    if links == 'value':
+      if (min_val == ''):
+	return redirect(url_for('error', template='index_tabular', error='When choosing VALUE to represent your link, you need to enter a complete range. Please try again.'))   
+ 
+    if table and allowed_file(table.filename):
+      file_upload(table, unique)
+      table_name = secure_filename(table.filename)
+      table_path = '%s/%s' % (TASK, table_name)
+
+      #writing info.txt
+      with open(INFO, 'a' ) as f:
+        f.write('Type: Tabular Visualization\nDescription: %s\n\nDate: %s\nID: %s\nTable: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, table_name))
+      
+      #parse-table.conf
+      with open(parse_table, 'a') as p:
+        #normalization
+        #by default, will be normalized
+	p.write('normalize_contribution = %s\n' % (normal))
+	p.write('use_segment_normalization = %s\n' % (normal))
+	#<linkcolor>
+	p.write('<<include %s/%s.conf>>\n' % (TASK, links))
+
+      	#color.conf
+      	if links == 'percentile':
+	  #color
+	  p.write('<<include %s/color.conf>>\n' % (TASK))
+	  p.write('ribbon_variable = yes\n')
+	  p.write('ribbon_variable_intra_collapse = yes\n')     
+	  with open(color_conf, 'a') as c:
+	    #c.write('cell_q3_color    = lgrey\n')
+	    c.write('cell_q4_color    = %s\n' % (color))
+	    #c.write('cell_q3_nostroke = yes\n')
+	    #c.write('cell_q4_nostroke = yes\n')
+
+	if links == 'value':
+	  if sym == 'no':
+	    p.write('ribbon_variable = no\n')
+	    p.write('ribbon_variable_intra_collapse = no\n')
+	  if sym == 'yes':
+	    p.write('ribbon_variable = yes\n')
+	    p.write('ribbon_variable_intra_collapse = yes\n')  	
+
+      #<linkcolor>
+      #value.conf
+      if links == 'value':
+	v1 = float(min_val) / 4
+	v2 = float(min_val) / 2
+	v3 = float(min_val) - 1
+	v4 = float(min_val) - 0.1
+	#min_val = int(min_val) - 0.0001
+	max_val = 10000
+	
+	with open(link_color, 'a') as v:
+	  c = 'color = '
+	  t = 'transparency = 1'
+	  st = 'stroke_thickness = 0'
+	  v.write('%s\n%s\n' % (t, st))
+	  v.write('<value %s>\n%s vvlgrey\n</value>\n' % (v1, c))
+	  v.write('<value %s>\n%s vlgrey\n</value>\n' % (v2, c))
+	  v.write('<value %s>\n%s lgrey\n</value>\n' % (v3, c))
+	  v.write('<value %s>\n%s %s\n</value>\n' % (v4, c, color))
+	  v.write('<value %s>\n%s %s\n</value>\n' % (max_val, c, color))
+	  v.write('</linkcolor>')
+	 
+      #segment order & color
+      with open(table_path, 'r') as upload:
+	uploaded = upload.readlines()
+      with open(to_parse, 'a') as parse:
+        n = uploaded[0].count('\t') + 1
+        print n
+        parse.write("segment_order\t")
+        for x in range(1, n):
+          parse.write('%s\t' % (x))
+        parse.write('\n')
+        parse.write("segment_color\t")
+        for x in range(1, n):
+          parse.write('"0,0,0"\t')
+        parse.write('\n')
+        for x in range(0, (n)):
+	  parse.write(uploaded[x])  
+
+      #parse table + make conf 
+      cmd_table = 'cat %s | parse-table -conf %s > %s/parsed.txt' % (to_parse, parse_table, TASK)
+      subprocess_cmd(cmd_table)
+      
+      return redirect(url_for('circos_display', type='tabular', unique=unique))
+    return redirect(url_for('error', template='index_tabular', error='File missing or with wrong extension. Please upload your file.'))
+  return redirect(url_for('error', template='index_tabular', error='An error occured while uploading your files. Please upload your files.')) 
 
 
 ####################################
@@ -307,6 +462,7 @@ def circos_display(type, unique):
     lines_legend = legend(unique)
   else:
     lines_legend = []
+  print type
   return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, type=type)
 
 
@@ -315,16 +471,20 @@ def circos_display(type, unique):
 ##	      GET SVG	 	  ##
 ##				  ##
 ####################################
-@app.route('/get_svg/<unique>', endpoint='get_svg')
+@app.route('/get_svg/<unique>/<type>', endpoint='get_svg')
 @login_required
-def get_svg(unique):
+def get_svg(unique, type):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
-  INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
-  SVG = '%s/%s/%s/circos_%s.svg' % (USER, user, unique, unique)
-  PNG = '%s/%s/%s/circos_%s.png' % (USER, user, unique,unique)
+  INFO = '%s/info.txt' % (TASK)
+  LEGEND = '%s/legend.txt' % (TASK)
+  TAB = '%s/tab.txt' % (TASK)
+  ERROR = '%s/error.txt' % (TASK)
+  SVG = '%s/circos_%s.svg' % (TASK, unique)
+  PNG = '%s/circos_%s.png' % (TASK, unique)
+  CIR_CONF = '%s/circos.conf' % (TASK)
   content = '' 
-
+  
   #previous circos
   if os.path.isfile(SVG) and not Circos.query.filter_by(svg=unique).first() is None:
     print 'getting previous circos'
@@ -332,9 +492,25 @@ def get_svg(unique):
     content = open(SVG).read()
     return content
 
+  #start spinning wheel (always false)
+  elif not os.path.isfile(TAB):
+    with open(TAB, 'a'):
+      return content
+ 
   #current circos
   else:
     print 'getting current circos'
+    # if true, tabular circos -> need to create conf and launch circos
+    if 'tabular' in type:
+      print 'mkae-conf'
+      cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s; > %s/error.txt' % (TASK, TASK, TASK)
+      subprocess_cmd(cmd_conf)
+      #circos
+      if file_ready(ERROR):
+        print 'specific tabular'
+        specific(unique)
+        circos(CIR_CONF, unique)
+    
     p = process.get('%s_circos' % (unique), 'None')
     if os.path.isfile('process.txt'): #if file is there, then circos is still running
       return content
@@ -342,10 +518,9 @@ def get_svg(unique):
     else:
       print 'looking for error in circos'
       #look for any error
-      error = '%s/error.txt' % (TASK)
-      file_ready(error)
+      file_ready(ERROR)
       logs(unique)
-      with open(error, 'r') as f:
+      with open(ERROR, 'r') as f:
         for line in f:
           if '*** CIRCOS ERROR ***' in line:
             content = 'error'
@@ -356,25 +531,78 @@ def get_svg(unique):
       if os.path.isfile(SVG): 
        file_ready(SVG)
        content = open(SVG).read()
-       with open(INFO, 'r') as i:
-         type = i.readline()
        if 'data' in type:
+	 os.remove(ERROR)
+	 os.remove(TAB)
          #create circos.zip
          zip_circos(unique)
-       elif 'configuration' in type:
+       else:
          #cleaning task folder
+	 print 'cleaning task folder'
          files = os.listdir(TASK)
          for f in files:
-           if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f):
-	     os.remove('%s/%s/%s/%s' % (USER, user, unique, f))
+           if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f) and ('parse-table.conf' not in f):
+	     os.remove('%s/%s' % (TASK, f))
        #save circos into db
        if current_user.is_authenticated():
-         circos = Circos(svg='%s' % (unique), user_id=current_user.id)
-         db.session.add(circos)
+         c = Circos(svg=unique, user_id=current_user.id)
+         db.session.add(c)
          db.session.commit()
        #send notification/email to user
-       send_email(unique) 
+       send_email(unique,type) 
        return content
+
+####################################
+##				  ##
+##	      GENE INFO	 	  ##
+##				  ##
+####################################
+@app.route('/gene_info/<c>/<s>/<e>', methods=['GET', 'POST'], endpoint='gene_info')
+@login_required
+def gene_info(c, s, e):
+  #print c, s, e
+  server = "http://rest.ensembl.org"
+  
+  #get mapped start and end of gene (if position relate to gene)
+  ext1 = "//map/human/GRCh37/" + str(c) + ":" + str(s) + ".." + str(e) + ":1/GRCh38?"
+  r1 = requests.get(server + ext1, headers = {"Content-Type" : "application/json"})
+  if not r1.ok:
+    r1.raise_for_status()
+    sys.exit()
+  i1 = r1.json()
+  if i1 == []:
+    print "This position does not correspond to a gene"
+    i = "This position does not correspond to a gene"
+    return i
+  else:
+    ms = i1["mappings"][0]["mapped"]["start"]
+    me = i1["mappings"][0]["mapped"]["end"]
+    #print ms, me
+
+  #get external name
+  ext2 = "/overlap/region/human/" + str(c) + ":" + str(ms) + "-" + str(me) + "?feature=gene"
+  r2 = requests.get(server + ext2, headers = {"Content-Type" : "application/json"})
+  if not r2.ok:
+    r2.raise_for_status()
+    sys.exit()
+  i2 = r2.json()
+  if i2 == []:
+    print "This position does not correspond to a gene"
+    i = "This position does not correspond to a gene"
+    return i
+  else: 
+    #n = ["Name", "ID", "Biotype", "Description"] #parameters name
+    i = [i2[0]["external_name"], i2[0]["gene_id"], i2[0]["biotype"], i2[0]["description"]] #gene info
+    i = json.dumps(i) #gene info
+    #i = json.dumps([i2[0][3], i2[0][9], i2[0][14], i2[0][12]]) #gene info
+    #print n
+    #print i
+    return i
+    #n = i2[0]["external_name"]
+    #i = i2[0]["gene_id"]
+    #b = i2[0]["biotype"]
+    #d = i2[0]["description"]
+    #return n, i, b, d
 
 ####################################
 ##				  ##
@@ -404,7 +632,9 @@ def download(unique, to_download):
 def delete(unique):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
-
+  print 'deleting'
+  print unique
+  
   if current_user.is_authenticated():
     c = Circos.query.filter_by(svg=unique).first()
     #delete in db
@@ -443,11 +673,37 @@ def delete_all():
 @app.route('/mycircos', endpoint='mycircos')
 @login_required
 def mycircos():
+  user = authenticate()
+  #list of every circos and their type
+  c_lst = []
   #get user_id
   if current_user.is_authenticated():
     user_id = current_user.id
+    print user_id
+    #get every circos id
     c_all = Circos.query.filter_by(user_id=user_id).all()
-    return render_template('mycircos.html', title='MyCircos', c_all=c_all)
+    print c_all
+    for c in c_all:
+      #get some info assossiated with the id
+      with open('%s/%s/%s/info.txt' % (USER, user, c), 'r') as i:
+        lines = i.readlines()
+	for l in lines:
+	  if 'Type:' in l:
+	    type = l[6:]
+	    tup = (c, type)
+          if 'ZIP:' in l:
+	    zip = l[5:]
+	    tup = tup + (zip,)
+	  if 'Description:' in l:
+	    description = l[13:]
+	    tup = tup + (description,)
+	  if 'Date:' in l:
+	    date = l[6:]
+	    tup = tup + (date,)
+        c_lst.append(tup)
+	  
+    print c_lst
+    return render_template('mycircos.html', title='MyCircos', c_lst=c_lst)
 
 
 ####################################

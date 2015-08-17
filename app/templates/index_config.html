@@ -18,45 +18,42 @@
 {% endblock %}
 
 {% block header %}
-<h1> Upload configuration file(s) <small>Config package 
+<h1> Upload configuration package <small>.tar, .tar.gz, .zip</small></hi> 
 {% endblock %}
 
 {% block content %}
 <form action="/index_config" method="post"  enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-6">
-			<!-- personal notes from the user -->
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">Description</h3>
+			<div class="row">
+				<!-- personal notes from the user -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Description</h3>
+					</div>
+					<div class="panel-body">
+						<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
+					</div>
 				</div>
-				<div class="panel-body">
-					<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
 			</div>
-		</div>
-		</div>
-	</div>
 	
-	<div class="row">	
-		<div class="col-md-6">
-			<!-- configuration file -->
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">Files</h3>
- 				</div>
-  				<div class="panel-body">
-					<label for="config">.tar/.tar.gz or .zip</label><br>
-					<input type='file' name="config">
+			<div class="row">	
+				<!-- configuration file -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Package</h3>
+		 			</div>
+		  			<div class="panel-body">
+						<label for="config">.tar/.tar.gz or .zip</label><br>
+						<input type='file' name="config">
+					</div>
 				</div>
 			</div>
-		</div>
-	</div>
 
-	<div class="row">
-		<div class="col-md-6">
-			<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
+			<div class="row">
+				<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
 				<br><br>
-			<br><br>
+			</div>
 		</div>
 	</div>
 </form>
