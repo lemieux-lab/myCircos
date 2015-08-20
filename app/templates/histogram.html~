@@ -1,0 +1,83 @@
+<h3>Histogram</h3>
+<p>The first step in altering a track represented by a histogram is to locate its <code>&ltplot&gt</code> block in <b>specific.conf</b>.</p>
+<p>You should find the line <code>type = histogram</code> in that block.</p>
+
+<br>
+<h4><font color="#0088cc">Colors</font></h4>
+<p>By default, the bins will be filled white. You can easlity change it by replacing <em>white</em> with another color name: </p>
+<div class=row>
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-5">
+		<img class="media-object" src="{{ url_for('image', img='default_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+		<p><center><code>fill_color = white</code></center></p>
+	</div>
+	<div class="col-md-5">
+		<img class="media-object" src="{{ url_for('image', img='green_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+		<p><center><code>fill_color = green</code></center></p>
+	</div>
+</div>
+<p>It is much easier to differentiate bins this way, espacially when you have positive and negative value. Another way to do it would be to identifier values greater than 0 in blue, and values less than 0 in red.</p>
+<div class=row>
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-5">
+		<pre>&ltplot&gt<br>  type = histogram<br>  svgclass = histogram<br>  file = histo.txt<br>  r0 = 0.500r<br>  r1 = 0.950r<br>  orientation = out<br>  fill_color = white<br>  &lt&ltinclude axis.conf&gt&gt<br>  &ltrules&gt<br>    &lt&ltinclude svg_rule_track.conf&gt&gt<br>    <font color="#0088cc"><b>&ltrule&gt</b></font><br>      <font color="#0088cc"><b>condition = var(value) > 0</b></font><br>      <font color="#0088cc"><b>fill_color = blue</b></font><br>    <font color="#0088cc"><b>&lt/rule&gt</b></font><br>    <font color="#0088cc"><b>&ltrule&gt</b></font><br>      <font color="#0088cc"><b>condition = var(value) &lt 0</b></font><br>      <font color="#0088cc"><b>fill_color = red</b></font><br>    <font color="#0088cc"><b>&lt/rule&gt</b></font><br>  &lt/rules&gt<br>&lt/plot&gt</pre>
+	</div>
+	<div class="col-md-5">
+		<img class="media-object" src="{{ url_for('image', img='two_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+	</div>
+</div>
+<p>You can choose any color to differentiate your positive values from the negative ones.</p>
+
+<br>
+<h4><font color="#0088cc">Min & Max</font></h4>
+<p>The interface does not define a minimum and/or maximum values for your histogram. Instead, Circos will take the smallest and largest value from your data set, and define them as the min and max. It can sometime be hard to analyze data when there is a lot of small values and only a few large ones: the y-axis will be as large as the largest value. You can therefore set your own min and max within the <code>&ltplot&gt</code> block: </p>
+<div class="row">
+	<div class="col-md-4">
+		<img class="media-object" src="{{ url_for('image', img='min_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+		<p><center><code>min = 0</code></center></p>
+	</div>
+	<div class="col-md-4">
+		<img class="media-object" src="{{ url_for('image', img='max_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+		<p><center><code>max = 0</code></center></p>
+	</div>
+	<div class="col-md-4">
+		<img class="media-object" src="{{ url_for('image', img='min_max_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+		<p><center><code>min = -40</code></center></p>
+		<p><center><code>max = 40</code></center></p>
+	</div>			
+</div>
+
+<br>
+<h4><font color="#0088cc">Background</font></h4>
+<p>Changing the background color can sometime be usefull. If you want to do so, you will first have to define a new general block, <code>&ltbackgrounds&gt</code>. This block is within <code>&ltplot&gt</code> and will contain smaller blocks, <code>&ltbackground&gt</code>.</p>
+<div class=row>
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-5">
+		<pre>&ltplot&gt<br>  type = histogram<br>  svgclass = histogram<br>  file = histo.txt<br>  r0 = 0.500r<br>  r1 = 0.950r<br>  orientation = out<br>  fill_color = white<br>  &lt&ltinclude axis.conf&gt&gt<br>  &ltrules&gt<br>    &lt&ltinclude svg_rule_track.conf&gt&gt<br>  &lt/rules&gt<br>  <font color="#0088cc"><b> &ltbackgrounds&gt</b></font><br>  <font color="#0088cc"><b> &lt/backgrounds&gt</b></font><br>&lt/plot&gt</pre>
+	</div>
+	<div class="col-md-5">
+		<pre>&ltbackgrounds&gt<br>  <font color="#0088cc"><b>&ltbackground&gt</b></font><br>    <font color="#0088cc"><b>y0 = </b></font><br>    <font color="#0088cc"><b>y1 = </b></font><br>    <font color="#0088cc"><b>color = </b></font><br>  <font color="#0088cc"><b>&lt/background&gt</b></font><br>&lt/backgrounds&gt</pre>
+	<br>	
+	<p>You can as many <code>&ltbackground&gt</code> block as you want.</p>
+	<p><code>y0</code> and <code>y1</code> represent the y-axis range to be colored.</p>
+	<p><code>color</code> takes as value a color name.
+	</div>
+</div>
+<div class=row>
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-5">
+		<br><br><br>
+		<pre>&ltbackgrounds&gt<br>  <font color="#0088cc"><b>&ltbackground&gt</b></font><br>    <font color="#0088cc"><b>y0 = 0</b></font><br>    <font color="#0088cc"><b>y1 = 500</b></font><br>    <font color="#0088cc"><b>color = vlblue</b></font><br>  <font color="#0088cc"><b>&lt/background&gt</b></font><br>  <font color="#0088cc"><b>&ltbackground&gt</b></font><br>    <font color="#0088cc"><b>y0 = 0</b></font><br>    <font color="#0088cc"><b>y1 = -300</b></font><br>    <font color="#0088cc"><b>color = vlred</b></font><br>  <font color="#0088cc"><b>&lt/background&gt</b></font><br>&lt/backgrounds&gt</pre>
+	</div>
+	<div class="col-md-5">
+		<img class="media-object" src="{{ url_for('image', img='back_histo.png')}}" alt="Default Histogram" style="margin-left: auto; margin-right: auto; width:100%; height:100%" >
+	</div>
+</div>
+
+
+
+

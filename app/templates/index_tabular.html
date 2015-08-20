@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block help %}
+<center><h3>Personalized Notes</h3></center>
+<p>You are free to write any personalized notes in the <em>Description</em> box. These notes will be displayed in the <em>Details</em> box when viewing Circos, and can serve as future reference.</p>
+
+<center><h3>File Upload</h3></center>
+Only <b>.txt</b> are accepted and they must be correctly formatted:
+<ul>
+	<li>The firsts row and column are the labels. </li>
+	<li>The (0,0) cell should contain the keyword <b>labels</b>.</li>
+	<li>The entries of the table are seperated by a <b>tab</b>. <em>If you are missing some entry, replace it by a <b>-</b></em></li> 
+	<li>The table must be <b>n x n</b></li>			
+	</ul></p>
+<p><pre>labels	1	2	3	4	5	6	7<br>1	102	100	87	171	180	337	184<br>2	51	-	58	35	79	80	74<br>3	121	55	39	134	80	130	103<br>4	130	79	121	28	213	168	79<br>...	...	...	...	...	...	...	...<br>8	166	78	109	90	42	107	67</pre></p>
+<p><em>This interface can support a table as big as 200x200</em></p>
+
+<center><h3>Options</h3></center>
+<p>You can choose to normalize or not the values for every segment.</p>
+<div class="row">
+	<div class="col-md-6">
+		<img class="media-object" src="{{ url_for('image', img='normalized.png')}}" alt="Normalized values" style="margin-left: auto; margin-right: auto; width:75%; height:75%" >
+		<center>Normalized values: <em>every segment will have the same size</em></center>
+	</div>
+	<div class="col-md-6">
+		<img class="media-object" src="{{ url_for('image', img='not_normalized.png')}}" alt="Normalized values" style="margin-left: auto; margin-right: auto; width:75%; height:75%" >
+		<center>Not normalized values:<em>every segment will have a size relative to its values</em></center>
+	</div>
+</div>
+{% endblock %}
+
+{% block header %}
+<h1> Upload table <small>.txt</small></h1> 
+{% endblock %}
+
+{% block content %}
+<form action="/index_tabular" method="post"  enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-md-6">
+			<h3><center><font color="#0088cc">How to...</font> Visualize tabular data<center></h3>		
+			<p>The first step is to make sure that you have the proper format for your data table. The <b>.txt</b> file to be uploaded must be organized such that:
+			<ul>
+				<li>The firsts row and column are the labels. </li>
+				<li>The (0,0) cell should contain the keyword <b>labels</b>.</li>
+				<li>The entries of the table are seperated by a <b>tab</b>. <em>If you are missing some entry, replace it by a <b>-</b></em></li> 
+				<li>The table must be <b>n x n</b></li>			
+			</ul></p>
+			<p><em>This interface can support a table as big as 200x200</em></p>
+			<p>The next step is to upload your data table to the interface and select the different options. 
+			<p><em>If values are normalized, every segments will have the same size. Otherwise, segments will be sized relative to their values</em>).</p>
+			<!-- personal notes from the user -->
+			<div class="row">
+				<!-- personal notes from the user -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Description</h3>
+					</div>
+					<div class="panel-body">
+						<textarea class="form-control" id="comments" name="comments" placeholder="Description">{{comments}}</textarea>
+					</div>
+				</div>
+			</div>
+			<div class="row">	
+				<!-- configuration file -->
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Table</h3>
+		 			</div>
+		  			<div class="panel-body">
+						<label for="normal">Would you like to normalize the values for each segment?</label><br>
+						<div class="row">
+							<div class="col-md-6">
+								<input type='radio' name='normal' value='yes' checked>&nbspNormalize
+							</div>
+							<div class="col-md-6">
+								<input type='radio' name='normal' value='no'>&nbspDon't normalize
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-md-6">
+								<label for="color">Color</label>
+								<br>
+								<select name="color" id="id">
+									<option value="red">Red</option>
+									<option value="blue">Blue</option>
+									<option value="green">Green</option>
+									<option value="orange">Orange</option>
+									<option value="purple">Purple</option>
+								</select>
+							</div>
+							<div class="col-md-6">					
+								<label for="tabular">File</label>
+								<br>
+								<input type='file' name="tabular">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-md-6">
+								<label for="sym">Is your table symetrical?</label>
+								<br>
+								<input type="radio" name="sym" value="yes" checked>&nbspYes
+								<input type="radio" name="sym" value="no">&nbspNo
+							</div>
+						</div>
+						<br>
+						<label for="links">Would you like to use percentiles or a threshold value to represent your links?</label><br>
+						<div class="row">
+							<div class="col-md-6">
+								<input type='radio' name='links' value='percentile' checked>&nbspPercentiles
+							</div>
+							<div class="col-md-6">
+								<input type='radio' name='links' value='value'>&nbspValue: &nbsp
+								<input type="text" placeholder="Values >" id="min" name="min" size="8">
+								
+							</div>
+						</div>	
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<input id="submit" class="btn btn-primary btn-lg pull-right" type="submit" value="Generate">
+				<br><br>
+				<br><br>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-5">
+			<br><br><br><br><br>
+			<p><pre>labels	1	2	3	4	5	6	7	8<br>1	102	100	87	171	180	337	184	79<br>2	51	-	58	35	79	80	74	72<br>3	121	55	39	134	80	130	103	36<br>4	130	79	121	28	213	168	79	97<br>...	...	...	...	...	...	...	...	...<br>8	166	78	109	90	42	107	67	81</pre></p>
+			<center><p>Well formatted data table</p></center>
+			<br><br><br>
+			<div class="row">
+				<div class="col-md-6">
+					<img class="media-object" src="{{ url_for('image', img='normalized.png')}}" alt="Normalized values" style="margin-left: auto; margin-right: auto; width:110%; height:110%" >
+					<center><p>Normalized values</p></center>
+				</div>
+				<div class="col-md-6">
+					<img class="media-object" src="{{ url_for('image', img='not_normalized.png')}}" alt="Normalized values" style="margin-left: auto; margin-right: auto; width:110%; height:110%" >
+					<center><p>Not normalized values</p></center>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
