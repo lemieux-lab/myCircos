@@ -1,0 +1,7 @@
+<linkcolor>
+  color_source       = row
+  percentile_source  = larger
+  #color_transparency = 1
+  color_remap        = yes #no
+  color_autoremap    = no
+    

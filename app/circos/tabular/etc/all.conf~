@@ -1,0 +1,21 @@
+<links>
+  <link cellvalues>
+    ribbon           = yes
+    flat             = yes
+    file             = cells.txt
+    bezier_radius    = 0.0r
+    radius           = 0.999r-15p
+    thickness        = 1
+    color            = grey
+    stroke_color     = dgrey
+    stroke_thickness = 0
+    <rules>
+      <rule>
+	importance = 95
+	condition  = 1
+	radius1    = 0.999r+2p
+	flow = continue
+      </rule>
+    </rules>
+   </link>
+</links>

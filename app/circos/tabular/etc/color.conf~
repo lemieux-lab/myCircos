@@ -1,0 +1,4 @@
+cell_q1_color    = vvlgrey
+cell_q2_color    = vlgrey
+cell_q1_nostroke = yes
+cell_q2_nostroke = yes

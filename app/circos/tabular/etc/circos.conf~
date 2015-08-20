@@ -1,0 +1,106 @@
+# This is the main configuration file for the Circos tableviewer. This
+# file also depends on colors.conf (definition on basic colors),
+# ideogram.conf (size and spacing of row/cell segments), and
+# ticks.conf (tick spacing and label definitions - these are turned
+# off by default).
+#
+# In addition to these configuration files, the bin/make-conf script
+# creates colors.conf (colors of row/col segments) and
+# colors_percentile.conf (colors based on cell percentile
+# values). These configuration files are also included via the
+# <<include>> directive.
+#
+# Some elements of the output image are toggled off by default
+# (e.g. row and column highlights, anchor links to segment labels,
+# tick marks).
+
+<colors>
+<<include colors.conf>>
+#<<include colors_percentile.conf>>
+</colors>
+
+<<include ideogram.conf>>
+<<include ticks.conf>>
+
+karyotype = karyotype.txt
+
+<image>
+<<include etc/image.conf>>
+radius* = 1500p
+</image>
+
+chromosomes_units              = 10
+chromosomes_display_default    = yes
+chromosomes_order_by_karyotype = yes
+
+<highlights>
+show = no
+stroke_color     = vdgrey
+stroke_thickness = 1
+
+<highlight>
+#show = yes
+file = row.txt
+r0   = 1r+300p
+r1   = 1r+310p
+</highlight>
+
+<highlight>
+#show = yes
+file = col.txt
+r1   = 1r+330p
+r0   = 1r+320p
+</highlight>
+
+<highlight>
+#show = yes
+file = all.txt
+r1   = 1r+280p
+r0   = 1r+260p
+</highlight>
+
+<highlight>
+#show = yes
+file = cap.col.txt
+r1   = 0.999r-10p
+r0   = 0.999r-30p
+</highlight>
+
+<highlight>
+#show = yes
+file = cap.row.txt
+r1   = 0.999r
+r0   = 0.999r-20p
+</highlight>
+
+</highlights>
+
+<links>
+
+<link cellvalues>
+ribbon           = yes
+flat             = yes
+file             = cells.txt
+bezier_radius    = 0.0r
+radius           = 0.999r-15p
+thickness        = 1
+color            = grey
+stroke_color     = dgrey
+stroke_thickness = 0
+<rules>
+
+<rule>
+importance = 95
+condition  = 1
+radius1    = 0.999r+2p
+flow = continue
+</rule>
+
+</rules>
+
+</link>
+
+</links>
+
+<<include etc/colors_fonts_patterns.conf>>
+<<include etc/housekeeping.conf>>
