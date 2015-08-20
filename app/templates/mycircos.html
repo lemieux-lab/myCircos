@@ -34,7 +34,7 @@
 								<li><a href="/download/{{ tup[0] }}/circos_{{ tup[0] }}.svg">Circos.svg</a></li>
 								{% if 'Data' in tup[1] %}
 	    								<li><a href="/download/{{ tup[0] }}/circos.zip">Circos.zip</a></li>
-								{% elif 'Configuration' in tup[1] %}
+								{% else %}
 									<li class='disabled'><a href="/download/{{ tup[0] }}/circos.zip">Circos.zip</a></li>
 								{% endif %}
 							</ul>

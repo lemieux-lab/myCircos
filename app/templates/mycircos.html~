@@ -55,7 +55,6 @@
 		<div class="modal-dialog"> 
 			<div class="modal-content">
 				<div class="modal-body">
-					{% for t in tup %}{{ t }}{% endfor %}
 					<h3><center> Deleting Circos</center></h3>
 					<p>Are you sure you want to delete this Circos: </p>
 					<p><pre><b>Generated: </b>{{ tup[3] }}<b>Type: </b>{{ tup[1] }}{% if tup[4] %}<b>ZIP: </b>{{ tup[4] }}{% endif %}<b>ID: </b>{{ tup[0] }}<br><b>Description: </b>{{ tup[2] }}</pre></p><br>

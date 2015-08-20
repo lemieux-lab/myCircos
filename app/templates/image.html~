@@ -84,6 +84,14 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<input type="range" id="zoom-range" min="50" max="250" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
 			</div>		
 		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-10">
+				<label for="species"><font color="#0088cc">Species&nbsp&nbsp&nbsp</font></label> 
+				<input type='radio' name='species' id='species' value='human' checked>&nbspHomo sapiens&nbsp&nbsp&nbsp&nbsp&nbsp 
+				<input type='radio' name='species' id='species' value='mouse'>&nbspMouse 
+			</div>
+		</div>
 		<div class="row">
 			<br>
 			<div class="col-md-7">
@@ -208,10 +216,11 @@ function tt(data){
 };
 
 //callback function -> get value from asynchronous
-function ajax(c, s, e, callback){
+function ajax(c, s, e, species, callback){
 	var c = c.replace("chr","")
+	console.debug(species)
 	$.ajax({
-		url : "/gene_info/" + c + "/" + s + "/" + e,
+		url : "/gene_info/" + c + "/" + s + "/" + e + "/" + species,
 		cache : false,
 		datatype: "text",
 		success: function(i){
@@ -219,6 +228,9 @@ function ajax(c, s, e, callback){
 		},
 	});
 }
+
+var species = document.getElementById("species").value
+var server = "http://rest.ensembl.org"
 
 function getImage () {
 	console.debug("getImage");
@@ -231,7 +243,7 @@ function getImage () {
  	   		console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
-				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
+				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div><p><center>Do not close this current tab while your Circos is beeing generated. You will receive an e-mail once the task is done.</center></p></div>');
 				{% endblock%} 	   		
 			}
 
@@ -273,36 +285,37 @@ function getImage () {
 						var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
 						var s = t.getAttribute("data-start");
 						var e = t.getAttribute("data-end");
-						ajax(chr, s, e, function(data){
-							// tooltip : value + chr & position
-							//$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e, container: 'body', placement: "auto left", trigger:'hover', html:'true'});    							
-							if (data[0]== '['){
-								//console.debug('gene!!!')
-								var array = data.split(",");
-								//console.debug(array)
-								$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>Name: ' + array[0].replace(/[\[\]",]+/g, "") + '<br>ID: ' + array[1].replace(/[\[\]",]+/g, "") + '<br>Biotype: ' + array[2].replace(/[\[\]",]+/g, "") + '<br>Description: ' + array[3].replace(/[\[\]",]+/g, ""), container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-							}
-							else{
-								//console.debug('no gene :(')
-								$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>' + data, container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-							}
-						/*$(t).mouseover(function(){
-							ajax(chr, s, e, function(data){
-								document.getElementById("gene_info").style.display = 'block';
-								var div = document.getElementById('gi');
-								if (data[0]== '['){
-									var array = data.split(",");
-									div.innerHTML = "<font color='#0088cc'><b>Gene name: </b></font> " + array[0].replace(/[\[\]",]+/g, "") + "<br><font color='#0088cc'><b>Gene ID: </b></font>" + array[1].replace(/[\[\]",]+/g, "") + "<br><font color='#0088cc'><b>Biotype: </b></font>" + array[2].replace(/[\[\]",]+/g, "") + "<br><font color='#0088cc'><b>Description: </b></font>" +  array[3].replace(/[\[\]",]+/g, "");
-								else{
-									div.innerHTML = data
-} 			
-							});
-						});
-
-						$(t).mouseout(function(){
-							document.getElementById("gene_info").style.display = "none";			
-						});*/
-						});
+						//$(t).mouseover(function(){
+							$.ajax({
+        							url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    								}).then(function(data1) {
+									//console.debug(typeof(data1))
+									console.debug(data1)
+									if (data1.mappings.length == 0){
+										$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>This position does not correspond to a gene', container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+									}
+									else {
+										var ms = data1["mappings"][0]["mapped"]["start"]
+    										var me = data1["mappings"][0]["mapped"]["end"]
+										$.ajax({
+											url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    									}).then(function(data2) {
+												console.debug(data2)
+												if (data2.length == 0){
+													$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>This position does not correspond to a gene', container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+												}
+												else {
+													console.debug(data2[0]["external_name"])
+													console.debug(data2[0]["gene_id"])
+													console.debug(data2[0]["biotype"])
+													console.debug(data2[0]["description"])
+													$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>Name: ' + data2[0]["external_name"].replace(/[\[\]",]+/g, "") + '<br>ID: ' + data2[0]["gene_id"].replace(/[\[\]",]+/g, "") + '<br>Biotype: ' + data2[0]["biotype"].replace(/[\[\]",]+/g, "") + '<br>Description: ' + data2[0]["description"].replace(/[\[\]",]+/g, ""), container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+												}
+												
+										});									
+									}
+    								});
+						//});
 					}
 				});
 			
@@ -310,12 +323,12 @@ function getImage () {
 				$("g[id^='plot'] circle").each(function(i,v) {
 					id = $(this).parent()[0].id;
 					if (id.search('axis')==-1){
-						var val = this.getAttribute("data-value");
-						var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
-						var s = this.getAttribute("data-start");
-						var e = this.getAttribute("data-end");
+						var t = this
+						var val = (t.getAttribute("data-value")).replace(/'/g,"");
+						var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
+						var s = t.getAttribute("data-start");
+						var e = t.getAttribute("data-end");
 						$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-						
 					}
 				});
 	

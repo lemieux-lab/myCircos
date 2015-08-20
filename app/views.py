@@ -338,6 +338,7 @@ def index_tabular():
   parse_table = '%s/parse-table.conf' % (TASK)
   color_conf = '%s/color.conf' % (TASK)
   to_parse = '%s/to_parse.txt' % (TASK)
+  circos = '%s/circos.conf' % (TASK)
 
   #main configuration files
   copy_dir('%s/tabular/etc' % (CONF), 'etc', '%s/%s/%s/' % (USER, user, unique))
@@ -352,6 +353,14 @@ def index_tabular():
     link_color = '%s/%s.conf' % (TASK, links)
     
     print links
+    # sym or asym
+    with open(circos, 'a') as ci:
+      if sym == 'no':
+        ci.write('\n<<include %s/row_col.conf>>' % (TASK))
+      if sym == 'yes':
+        ci.write('\n<<include %s/all.conf>>' % (TASK))
+    
+
     #looking for value range
     if links == 'value':
       if (min_val == ''):
@@ -393,28 +402,30 @@ def index_tabular():
 	    p.write('ribbon_variable_intra_collapse = no\n')
 	  if sym == 'yes':
 	    p.write('ribbon_variable = yes\n')
-	    p.write('ribbon_variable_intra_collapse = yes\n')  	
+	    p.write('ribbon_variable_intra_collapse = yes\n')
+  	
 
       #<linkcolor>
       #value.conf
       if links == 'value':
 	v1 = float(min_val) / 4
 	v2 = float(min_val) / 2
-	v3 = float(min_val) - 1
-	v4 = float(min_val) - 0.1
+	#v3 = float(min_val) - 1
+	v4 = float(min_val)
 	#min_val = int(min_val) - 0.0001
 	max_val = 10000
+	print v1, v2, v4
 	
 	with open(link_color, 'a') as v:
 	  c = 'color = '
 	  t = 'transparency = 1'
 	  st = 'stroke_thickness = 0'
 	  v.write('%s\n%s\n' % (t, st))
-	  v.write('<value %s>\n%s vvlgrey\n</value>\n' % (v1, c))
-	  v.write('<value %s>\n%s vlgrey\n</value>\n' % (v2, c))
-	  v.write('<value %s>\n%s lgrey\n</value>\n' % (v3, c))
-	  v.write('<value %s>\n%s %s\n</value>\n' % (v4, c, color))
-	  v.write('<value %s>\n%s %s\n</value>\n' % (max_val, c, color))
+	  v.write('<value %s>\n%s vvlgrey\n%s\n%s\n</value>\n' % (v1, c, t, st)) #
+	  v.write('<value %s>\n%s vlgrey\n%s\n%s\n</value>\n' % (v2, c, t, st)) #
+	  v.write('<value %s>\n%s lgrey\n%s\n%s\n</value>\n' % (v4, c, t, st)) #
+	  #v.write('<value %s>\n%s vlgrey\n%s\n%s\n</value>\n' % (min_val, c, t, st))#, color))
+	  v.write('<value %s>\n%s %s\n%s\n%s\n</value>\n' % (max_val, c, color, t, st))
 	  v.write('</linkcolor>')
 	 
       #segment order & color
@@ -435,8 +446,11 @@ def index_tabular():
 	  parse.write(uploaded[x])  
 
       #parse table + make conf 
+      print 'parsing table'
       cmd_table = 'cat %s | parse-table -conf %s > %s/parsed.txt' % (to_parse, parse_table, TASK)
       subprocess_cmd(cmd_table)
+      cmd_check = 'cat %s/parsed.txt' % (TASK)
+      subprocess_cmd(cmd_check)
       
       return redirect(url_for('circos_display', type='tabular', unique=unique))
     return redirect(url_for('error', template='index_tabular', error='File missing or with wrong extension. Please upload your file.'))
@@ -502,7 +516,7 @@ def get_svg(unique, type):
     print 'getting current circos'
     # if true, tabular circos -> need to create conf and launch circos
     if 'tabular' in type:
-      print 'mkae-conf'
+      print 'make-conf'
       cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s; > %s/error.txt' % (TASK, TASK, TASK)
       subprocess_cmd(cmd_conf)
       #circos
@@ -557,14 +571,14 @@ def get_svg(unique, type):
 ##	      GENE INFO	 	  ##
 ##				  ##
 ####################################
-@app.route('/gene_info/<c>/<s>/<e>', methods=['GET', 'POST'], endpoint='gene_info')
+@app.route('/gene_info/<c>/<s>/<e>/<species>', methods=['GET', 'POST'], endpoint='gene_info')
 @login_required
-def gene_info(c, s, e):
+def gene_info(c, s, e, species):
   #print c, s, e
   server = "http://rest.ensembl.org"
   
   #get mapped start and end of gene (if position relate to gene)
-  ext1 = "//map/human/GRCh37/" + str(c) + ":" + str(s) + ".." + str(e) + ":1/GRCh38?"
+  ext1 = "//map/" + species + "/GRCh37/" + str(c) + ":" + str(s) + ".." + str(e) + ":1/GRCh38?"
   r1 = requests.get(server + ext1, headers = {"Content-Type" : "application/json"})
   if not r1.ok:
     r1.raise_for_status()
@@ -580,7 +594,7 @@ def gene_info(c, s, e):
     #print ms, me
 
   #get external name
-  ext2 = "/overlap/region/human/" + str(c) + ":" + str(ms) + "-" + str(me) + "?feature=gene"
+  ext2 = "/overlap/region/" + species + "/" + str(c) + ":" + str(ms) + "-" + str(me) + "?feature=gene"
   r2 = requests.get(server + ext2, headers = {"Content-Type" : "application/json"})
   if not r2.ok:
     r2.raise_for_status()

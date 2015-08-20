@@ -26,42 +26,50 @@
 	</head>
 
 	<body>
-		<div class="container-fluid">
+		<div class="container-fluid" >
 			<!-- navigation bar-->
-			<nav class="navbar navbar-standard" role="navigation">
-	    			<ul class="nav navbar-nav">
-					<li><a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"></span> Home </a></li>
-					<li class="dropdown">
-		    				<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-repeat"></span> Generate a Circos </a>
-		    				<ul class="dropdown-menu">
-		       			 	<li><a href="/generate/data"> From data files </a></li>
-		        			<li><a href="/generate/config"> From configuration files </a></li>
-						<li><a href="/generate/tabular"> From tabular data </a></li>
-						<li role="separator" class="divider"></li>
-						<li><a href="/generate/tabular"> Personalize your Circos</a></li>
-						</ul>
-	       				</li>
-					<li><a class="navbar-brand" href="/mycircos"><span class="glyphicon glyphicon-folder-open"></span> myCircos </a></li>
+			<div class="row">
+				<div class="col-md-2">
+					<img class="media-object" src="{{ url_for('image', img='logo.png')}}" style="margin-left: auto; margin-right: auto; width:80%; height:80%;">
+				</div>
+				<div class="col-md-10">
+					<br>
+					<nav class="navbar navbar-standard" role="navigation" >
+			    			<ul class="nav navbar-nav">
+							<li><a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"></span> Home </a></li>
+							<li class="dropdown">
+				    				<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-repeat"></span> Generate a Circos </a>
+				    				<ul class="dropdown-menu">
+				       			 	<li><a href="/generate/data"> From data files </a></li>
+								<li><a href="/generate/config"> From configuration files </a></li>
+								<li><a href="/generate/tabular"> From tabular data </a></li>
+								<li role="separator" class="divider"></li>
+								<li><a href="/howTo/personalize"> Personalize your Circos</a></li>
+								</ul>
+			       				</li>
+							<li><a class="navbar-brand" href="/mycircos"><span class="glyphicon glyphicon-folder-open"></span> myCircos </a></li>
 				
-	    			</ul>
-				<ul class="nav navbar-nav pull-right">
-					<li><a class="navbar-brand" href="#" role="button" data-toggle="modal" data-target="#help_info"><span class="glyphicon glyphicon-question-sign"></span> Help </a><li>
-					<li class="dropdown">
-				    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-							{% if current_user.is_authenticated() %}
-								{{ current_user.email }} 
-							{% else %}
-								User  
-							{% endif %}
-						</a>
-				    		<ul class="dropdown-menu">
-				       	 		<li><a href="/logout">Log Out</a></li>
-				    		</ul>
-			       		</li>
-				</ul>
-			</nav>
+			    			</ul>
+						<ul class="nav navbar-nav pull-right">
+							<li><a class="navbar-brand" href="#" role="button" data-toggle="modal" data-target="#help_info"><span class="glyphicon glyphicon-question-sign"></span> Help </a><li>
+							<li class="dropdown">
+						    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+									{% if current_user.is_authenticated() %}
+										{{ current_user.email }} 
+									{% else %}
+										User  
+									{% endif %}
+								</a>
+						    		<ul class="dropdown-menu">
+						       	 		<li><a href="/logout">Log Out</a></li>
+						    		</ul>
+					       		</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
 		
-
+			
 			<!-- help modal -->
 			<div class="modal fade" id="help_info" role="dialog">
 				<div class="modal-dialog" style="overflow-y: scroll; max-height:85%;  margin-top: 50px; margin-bottom:50px;"> 
@@ -85,8 +93,6 @@
 				</div>
 			</div>
 					 
-	
-			
 			<!-- page title -->
 			<div class="page-header">
 		      		{% block header %}<h1> Circos Interface <small>Make your own Circos</small></h1>{% endblock %}
@@ -107,9 +113,15 @@
 			<!-- page related content -->
 			{% block content %}
 			{% endblock %}
-			
+			<br><br>	
 		</div>
+		<div class="panel-footer" style="height:24px; width: 100%; background-position: 0% 0%; position: fixed; bottom: 5pt;left: 0pt;">
+      			<p class="text-muted">© 2015 Institute for Research in Immunology and Cancer | All Rights Reserved.</p>
+    		</div>
 	</body>
+
+
+	
 
 	<!-- Javascript files -->
     	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
