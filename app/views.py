@@ -9,28 +9,33 @@ from app import app, db, lm, models
 import datetime, time, random, subprocess, collections, shutil, tarfile, zipfile
 from random import randint
 from subprocess import Popen, PIPE
+from celery import signature
+from celery.result import AsyncResult
 from views_session import *
 from util import *
 from task import *
 from upload import *
 from svg import *
 from circos import *
+from celery_tasks import circos, test, add, test_return
 from display import *
 from post_circos import *
 from .models import User, Circos
-
 
 ####################################################
 ####						####
 ####		      VARIABLES			####
 ####						####
 ####################################################
+
 #dictionary for running processes
 process = {}
 
 #paths
 CONF = 'app/circos'
 USER = 'app/circos/usr'
+
+#global C_R = ''
 
 
 ####################################################
@@ -92,6 +97,14 @@ def image(img):
 @app.route('/generate/data/', endpoint='data')
 @login_required
 def data():
+  test.run('run')
+  test.apply('apply')
+  test.delay('delay')
+
+  add.run(1,4)
+  add.apply(10,40)
+  add.delay(60,40)
+
   return render_template('index_data.html', title='Circos-Data')
 
 
@@ -264,7 +277,9 @@ def index_data():
 
     #generating the configuration files and the image
     generate(unique=unique, plots=plots, links=links, values=values)
-    circos('%s/circos.conf' % (TASK), unique) 
+    print "************************" + user + "************************"
+    circos.delay('%s/circos.conf' % (TASK), unique, user)
+    #print C_R.ready()
     return redirect(url_for('circos_display', type='data', unique=unique))
   return redirect(url_for('error', template='index_data', error='An error occured while loading your file(s). Please try again'))
    
@@ -433,7 +448,9 @@ def index_tabular():
 	uploaded = upload.readlines()
       with open(to_parse, 'a') as parse:
         n = uploaded[0].count('\t') + 1
-        print n
+	u = upload[0]
+	print u        
+	print n
         parse.write("segment_order\t")
         for x in range(1, n):
           parse.write('%s\t' % (x))
@@ -465,6 +482,7 @@ def index_tabular():
 @app.route('/circos_display/<type>/<unique>', endpoint='circos_display')
 @login_required
 def circos_display(type, unique):
+  #print C_R.ready()
   user = authenticate()
   LEGEND = '%s/%s/%s/legend.txt' % (USER, user, unique)
   TASK = '%s/%s/%s' % (USER, user, unique)
@@ -499,6 +517,11 @@ def get_svg(unique, type):
   CIR_CONF = '%s/circos.conf' % (TASK)
   content = '' 
   
+  print circos.request.id
+  print circos.AsyncResult(circos.request.id).state
+  
+  #print test.AsyncResult(test.request.id).state
+
   #previous circos
   if os.path.isfile(SVG) and not Circos.query.filter_by(svg=unique).first() is None:
     print 'getting previous circos'
@@ -693,11 +716,10 @@ def mycircos():
   #get user_id
   if current_user.is_authenticated():
     user_id = current_user.id
-    print user_id
     #get every circos id
     c_all = Circos.query.filter_by(user_id=user_id).all()
-    print c_all
-    for c in c_all:
+    c_ord = list(reversed(c_all))
+    for c in c_ord:
       #get some info assossiated with the id
       with open('%s/%s/%s/info.txt' % (USER, user, c), 'r') as i:
         lines = i.readlines()

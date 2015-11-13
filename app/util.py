@@ -12,8 +12,9 @@ from flask.ext.login import current_user
 
 #to execute command at the command line level
 def subprocess_cmd(cmd):
-  p = subprocess.Popen(cmd, shell=True, stdout = None, stderr=subprocess.STDOUT)
-  return p
+  #p = subprocess.Popen(cmd, shell=True, stdout = None, stderr=subprocess.STDOUT)
+  o,e = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
+  return o,e
 
 #user 
 def authenticate():

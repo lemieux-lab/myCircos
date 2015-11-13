@@ -7,6 +7,7 @@
 
 import os, os.path
 import shutil
+from app import app
 from util import *
 
 process = {}
@@ -14,16 +15,6 @@ process = {}
 CONF = 'app/circos'
 USER = 'app/circos/usr'
 
-
-########## BOTH #################
-#run circos
-def circos(path, unique):
-  print 'circos launched'
-  user = authenticate()
-  cmd_circos = '> process.txt; circos -conf %s -silent > %s/%s/%s/error.txt; rm process.txt' % (path, USER, user, unique) #using dummy method
-  p = subprocess_cmd(cmd_circos)
-  process['%s_circos' % (unique)] = p
-	
 
 ########## FROM DATA ############
 #list of all tracks to be displayed that we uploaded

@@ -54,13 +54,6 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 		<div class='svg' id='image_svg' display="block" margin="auto"></div>
 	</div>
 	<div class="col-md-4">
-		<!-- Hidden -->
-		<div class="col" id="gene_info" style="display:none">
-			<div class="panel panel-default">
-    				<div class="panel-body" id="gi">
-				</div>
-			</div>
-		</div>
 		<div class="row" >
 			<div class="col-md-7">
 				<button id='dLabel' type='button' class="btn btn-primary dropdown-toggle" data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Downloads<span class='caret'></span></button>
@@ -76,48 +69,98 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 			<div class="col-md-3">				
 				<button class="btn btn-danger pull-right" role='button' data-toggle="modal" data-target="#delete_confirm">Delete</button>
 			</div>
+			<div class="col-md-10">
+				<hr>
+			</div>
 		</div>
+		<!-- Zoom -->
 		<div class="row">
-			<br>
 			<div class="col-md-10">
 				<label for="zoom-"><font color="#0088cc">Zoom <span id="perc" >100%</span></font></label> 
 				<input type="range" id="zoom-range" min="50" max="250" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
 			</div>		
 		</div>
 		<br>
-		<div class="row">
-			<div class="col-md-10">
-				<label for="species"><font color="#0088cc">Species&nbsp&nbsp&nbsp</font></label> 
-				<input type='radio' name='species' id='species' value='human' checked>&nbspHomo sapiens&nbsp&nbsp&nbsp&nbsp&nbsp 
-				<input type='radio' name='species' id='species' value='mouse'>&nbspMouse 
+
+		{% if 'Tabular' not in type %}
+		<!-- Enable Highlights -->
+		<div class="row" >
+			<div class="col-md-5">
+				<label for="highlights"><font color="#0088cc">Highlights</font></label> 
+			</div>
+			<div class="col-md-5">				
+				<input id="highlights" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="h()">
 			</div>
 		</div>
-		<div class="row">
-			<br>
-			<div class="col-md-7">
-				<button id="emphasize" type="button" class="btn btn-default" class="btn" >Highlight</button>
-			</div>
-			<div class="col-md-3">
-				<button id="reset" type="button" class="btn btn-default pull-right" onclick="reset()"><font color="#0088cc">Reset</font></button>
-			</div>
-		</div>
-		<div class="row">
-			<br><br><br>
+
+		<!-- Tooltip info -->
+		<div class="row" >
 			<div class="col-md-5">
-				<button id="information" type="button" onclick="show_info()" class="btn btn-default">Details</button>
+				<label for="gene_info"><font color="#0088cc">Values & Gene Information</font></label> 
 			</div>
-			<div class="col-md-5">
-				<button id="legend" type="button" onclick="show_legend()" class="btn btn-default pull-right">Legend</button>
+			<div class="col-md-5">				
+				<input id="val" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="v()" >
 			</div>
 		</div>
 		
 		<div class="row">
+			<div class="col-md-5">
+				<label for="species"><font color="#0088cc">Gene information for: &nbsp&nbsp&nbsp</font></label> 
+			</div>
+			<div class="col-md-5">
+				<input type='radio' name='species' id='species' value='human' checked>&nbspHomo sapiens<br> 				
+				<input type='radio' name='species' id='species' value='mouse'>&nbspMouse
+			</div>
+		</div>
+		
+		<!-- Hidden -->
+		<div class="row" id="gene_info" style="display:none">
+			<br>
+			<div class="col-md-10">
+				<div class="panel panel-default">
+    					<div class="panel-body" >
+						<button type="button" class="close" onclick="close_panel('gene_info')">&times;</button>
+						<div class="panel-body-gi">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<button id="reset" type="button" class="btn btn-default pull-left" onclick="reset()"><font color="#0088cc">Reset</font></button>
+			</div>
+			<div class="col-md-10">
+				<hr>
+			</div>
+		</div>
+		{% endif %}
+
+		<!-- hidden -->
+		<div class="row" id ="show_l" style="display:none">
+			<div class="row">
+				<div class="col-md-10">
+					<center><button class="astext" onclick="show_panel('legend')">Show Legend</center>
+				</div>
+			</div>			
+		<br>
+		</div>
+
+		<div class="row" id ="show_d" style="display:none">
+			<div class="row">
+				<div class="col-md-10">
+					<center><button class="astext" onclick="show_panel('details')">Show Details</center>
+				</div>
+			</div>
+		</div>
+
+		<div class="row" id="legend" style="display:block">
 			<div class="col-md-10">
 				<br>
 				{% if lines_legend|length > 0 %}
 				<div class="panel panel-default" id="myLegend">
     					<div class="panel-body">
-						<button type="button" class="close" onclick="hide_legend()">&times;</button>
+						<button type="button" class="close" onclick="close_panel('legend')">&times;</button>
 						<center><font color="#0088cc"><b><u> Legend </u></b></font></center>
 						{% for l in lines_legend %}
 							{{ l }}
@@ -130,12 +173,12 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 			</div>
 		</div>
 		{% if lines_info|length > 0 %}
-		<div class="row">
+		<div class="row" id="details" style="display:block">
 			<div class="col-md-10">
 				<br>
 				<div class="panel panel-default" id="myInfo">
     					<div class="panel-body">
-						<button type="button" class="close" onclick="hide_info()">&times;</button>
+						<button type="button" class="close" onclick="close_panel('details')">&times;</button>
 						<center><font color="#0088cc"><b><u> Details </u></b></font></center>
 						{% for l in lines_info %}
 							{{ l }}
@@ -176,27 +219,36 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript"  src="{{url_for('static', filename='jquery.panzoom.js')}}"></script>
 <script type="text/javascript"  src="{{url_for('static', filename='tooltip.js')}}"></script>
+<script type="text/javascript"  src="{{url_for('static', filename='bootstrap-switch.js')}}"></script>
 <script type="text/javascript" >
 /*******************************************
 ****					****
 ****	    	INFO - LEGEND		****
 ****					****
 ********************************************/
-function show_info() {
-    document.getElementById("myInfo").style.visibility = "visible"; 
+//close panel -> gene info, info, legend
+function close_panel(id) {
+	console.debug('close: ' + id)
+	document.getElementById(id).style.display = "none";
+	if (id == 'legend') {
+		document.getElementById('show_l').style.display = "block";
+	}
+	if (id == 'details') {
+		document.getElementById('show_d').style.display = "block";	
+	}
 }
 
-function hide_info() {
-    document.getElementById("myInfo").style.visibility = "hidden"; 
+function show_panel(id) {
+	console.debug('show: ' + id)
+	document.getElementById(id).style.display = "block";
+	if (id == 'legend') {
+		document.getElementById('show_l').style.display = "none";		
+	}
+	if (id == 'details') {
+		document.getElementById('show_d').style.display = "none";
+	}
 }
 
-function show_legend() {
-    document.getElementById("myLegend").style.visibility = "visible"; 
-}
-
-function hide_legend() {
-    document.getElementById("myLegend").style.visibility = "hidden"; 
-}
 
 /*******************************************
 ****					****
@@ -260,9 +312,576 @@ function getImage () {
 				svg.setAttribute('width', "100%");
 				svg.setAttribute('height', "100%");
 				svg.setAttribute('viewBox', "-300 -300 3500 3500");
-				clearInterval(refresh);
+				clearInterval(refresh);							
+			}
+        }
+      });
+}
+
+/*******************************************
+****					****
+****	    	INTERACTIVITY 		****
+****					****
+********************************************/
+$(document).ready(function() {
+	$("[name='switch']").bootstrapSwitch();	
+});
+
+$("#image_svg").panzoom({
+ 	//$zoomIn: $("#zoom-in"),
+  	//$zoomOut: $("#zoom-out"),
+});
+
+function zoom(val){
+	console.debug(val)
+	var svg = $('#image_svg').find('svg')[0];
+	var v = val + "%"
+	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
+	document.getElementById("perc").innerHTML = v;
+	svg.setAttribute('width', v);
+	svg.setAttribute('height', v);
+	svg.setAttribute('viewBox', vb.join(" "))
+};
+
+function reset() {
+	document.location.reload(true);
+	console.debug('refreshed');
+};
+
+var emphasized = {}
+//highlight -> ON/OFF
+function h(){
+	console.debug(document.getElementById('highlights').checked)
+	if(document.getElementById('highlights').checked){
+		//var emphasized = {}
+		console.debug("highlight: ON")
+		//ideogram labels
+		$("#ideograms text").bind({
+			mouseenter: function() {
+				var x = this.getAttribute("x");
+				if (emphasized[x]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[x] = style;
+					$(this).css('fill', 'crimson');
+					$(this).css('font-size', '60');
+				}
+			
+			},
+			mouseleave: function() { 
+				var x = this.getAttribute("x")
+				$(this).attr("style", emphasized[x]);
+				delete emphasized[x];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var x = this.getAttribute("x");
+						$(this).attr("style", emphasized[x]);
+					$(this).removeAttr('id');
+					delete emphasized[x];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
 				
-				// info about tracks value
+				}			
+			},
+		});
+		//plot-axis
+		$("g[id^='plot'][id$='-axis'] path").bind({
+			mouseenter: function() {
+				var d = this.getAttribute("d");	
+				var style = this.getAttribute("style");
+				emphasized[d] = style;
+				$(this).attr("style", emphasized[d]);
+			},
+			mouseleave: function() {
+				var d = this.getAttribute("d");
+				$(this).attr("style", emphasized[d]);
+				delete emphasized[d];
+			},
+		});
+		//plots
+		$("g:not([id$='-axis'])[id^='plot'] path").bind({
+			mouseenter: function() {
+				var d = this.getAttribute("d");
+				//emphasize					
+				if (emphasized[d]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[d] = style;
+					$(this).css('fill', 'crimson');
+					if (this.getAttribute("class") == "tile") {
+						$(this).css('stroke', 'crimson');
+						$(this).css('stroke-width', '5.0');
+					}
+				}		
+			},
+			mouseleave: function() {
+				var d = this.getAttribute("d")
+				$(this).attr("style", emphasized[d]);
+				delete emphasized[d];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var d = this.getAttribute("d");
+					$(this).attr("style", emphasized[d]);
+					$(this).removeAttr('id');
+					delete emphasized[d];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized					
+				}
+			}
+		});
+		//scatter plots -> polygons
+		$("g:not([id$='-axis'])[id^='plot'] polygon").bind({
+			mouseenter: function() {
+				var cx = this.getAttribute("cx");
+				//emphasized
+				if (emphasized[cx]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[cx] = style;
+					$(this).css('fill', 'crimson')		
+					$(this).css('stroke', 'fireBrick');
+					$(this).css('stroke-width', '3.0');
+				}	
+			},
+			mouseleave: function() {
+				var cx = this.getAttribute("cx")
+				$(this).attr("style", emphasized[cx]);
+				delete emphasized[cx];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var cx = this.getAttribute("cx");
+					$(this).attr("style", emphasized[cx]);
+					$(this).removeAttr('id');
+					delete emphasized[cx];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
+				
+				}
+			}
+		});
+		//scatter plots -> rectangle
+		$("g:not([id$='-axis'])[id^='plot'] rectangle").bind({
+			mouseenter: function() {
+				var cx = this.getAttribute("cx");
+				//emphasized
+				if (emphasized[cx]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[cx] = style;
+					$(this).css('fill', 'crimson')		
+					$(this).css('stroke', 'fireBrick');
+					$(this).css('stroke-width', '3.0');
+				}	
+			},
+			mouseleave: function() {
+				var cx = this.getAttribute("cx")
+				$(this).attr("style", emphasized[cx]);
+				delete emphasized[cx];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var cx = this.getAttribute("cx");
+					$(this).attr("style", emphasized[cx]);
+					$(this).removeAttr('id');
+					delete emphasized[cx];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
+				
+				}
+			}
+		});
+		//scatter plots -> circle
+		$("g:not([id$='-axis'])[id^='plot'] circle").bind({
+			mouseenter: function() {
+				var cx = this.getAttribute("cx");
+				//emphasized
+				if (emphasized[cx]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[cx] = style;
+					$(this).css('fill', 'crimson')		
+					$(this).css('stroke', 'fireBrick');
+					$(this).css('stroke-width', '3.0');
+				}	
+			},
+			mouseleave: function() {
+				var cx = this.getAttribute("cx")
+				$(this).attr("style", emphasized[cx]);
+				delete emphasized[cx];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var cx = this.getAttribute("cx");
+					$(this).attr("style", emphasized[cx]);
+					$(this).removeAttr('id');
+					delete emphasized[cx];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
+				
+				}
+			}
+		});
+		//labels
+		$("g:not([id$='-axis'])[id^='plot'] text").bind({
+			mouseenter: function() {
+				var x = this.getAttribute("x");
+				//emphasized					
+				if (emphasized[x]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[x] = style;
+					$(this).css('fill', 'crimson');
+				}
+				},
+			mouseleave: function() { 
+				var x = this.getAttribute("x")
+				$(this).attr("style", emphasized[x]);
+				delete emphasized[x];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var x = this.getAttribute("x");
+					$(this).attr("style", emphasized[x]);
+					$(this).removeAttr('id');
+					delete emphasized[x];
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
+				}			
+			},
+		});
+		//links
+		$("#track_0 path").bind({
+			mouseenter: function() {
+				var d = this.getAttribute("d");
+				if (emphasized[d]) {
+					$(this).attr('id', 'e');	// emphasized already
+				} else {
+					var style = this.getAttribute("style");
+					emphasized[d] = style;
+					$(this).css('stroke', 'crimson');
+					$(this).css('stroke-width', '7')
+				}
+			},
+			mouseleave: function() {
+				var d = this.getAttribute("d")
+				$(this).attr("style", emphasized[d]);
+				delete emphasized[d];
+			},
+			click: function() {
+				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					var d = this.getAttribute("d");
+					$(this).attr("style", emphasized[d]);
+					$(this).removeAttr('id');
+					delete emphasized[d];	
+				} else {
+					$(this).off('mouseleave');		// keep emphasized
+				
+				}
+			}
+		});
+	} else {
+		console.debug("highlights: OFF")
+		$("#ideograms text").unbind("mouseenter mouseleave click")
+		$("g[id^='plot'][id$='-axis'] path").unbind("mouseenter mouseleave")
+		$("g:not([id$='-axis'])[id^='plot'] path").unbind("mouseenter mouseleave click")
+		$("g:not([id$='-axis'])[id^='plot'] polygon").unbind("mouseenter mouseleave click")
+		$("g:not([id$='-axis'])[id^='plot'] rectangle").unbind("mouseenter mouseleave click")
+		$("g:not([id$='-axis'])[id^='plot'] circle").unbind("mouseenter mouseleave click")
+		$("g:not([id$='-axis'])[id^='plot'] text").unbind("mouseenter mouseleave click")
+		$("#track_0 path").unbind("mouseenter mouseleave click")
+	}
+}
+
+//values + info -> ON/OFF
+function v(){
+	console.debug(document.getElementById('val').checked)
+	if(document.getElementById('val').checked){
+		//info about tracks' values
+		// histograms & heatmaps
+		$("g[id^='plot'] path").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				var t = this
+				var val = t.getAttribute("data-value");
+				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
+				var s = t.getAttribute("data-start");
+				var e = t.getAttribute("data-end");
+				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+				$(this).bind("click", function(){
+					document.getElementById("gene_info").style.display = "block";
+					
+					$.ajax({
+        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    					}).then(function(data1) {
+						console.debug(data1)
+							if (data1.mappings.length == 0){
+								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else {
+								var ms = data1["mappings"][0]["mapped"]["start"]
+    								var me = data1["mappings"][0]["mapped"]["end"]
+								$.ajax({
+									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    						}).then(function(data2) {
+									console.debug(data2)
+									if (data2.length == 0){
+									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}else {
+										console.debug(data2[0]['external_name'])
+										console.debug(data2[0]['gene_id'])
+										console.debug(data2[0]['biotype'])
+										console.debug(data2[0]['description'])
+										var n = data2[0]['external_name']
+										var i = data2[0]["gene_id"]
+										var b = (data2[0]["biotype"]).replace("_", " ")
+										var d = data2[0]["description"]
+										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}
+								});									
+							}
+    						});
+				})
+			}
+		});
+		// labels
+		$("g[id^='plot'] text").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				var t = this
+				var val = (t.getAttribute("data-value")).replace(/'/g,"");
+				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
+				var s = t.getAttribute("data-start");
+				var e = t.getAttribute("data-end");
+				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', trigger: 'hover', placement: "auto left", html:'true'});
+				$(this).bind("click", function(){
+					document.getElementById("gene_info").style.display = "block";
+					
+					$.ajax({
+        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    					}).then(function(data1) {
+						console.debug(data1)
+							if (data1.mappings.length == 0){
+								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else {
+								var ms = data1["mappings"][0]["mapped"]["start"]
+    								var me = data1["mappings"][0]["mapped"]["end"]
+								$.ajax({
+									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    						}).then(function(data2) {
+									console.debug(data2)
+									if (data2.length == 0){
+									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}else {
+										console.debug(data2[0]['external_name'])
+										console.debug(data2[0]['gene_id'])
+										console.debug(data2[0]['biotype'])
+										console.debug(data2[0]['description'])
+										var n = data2[0]['external_name']
+										var i = data2[0]["gene_id"]
+										var b = data2[0]["biotype"]
+										var d = data2[0]["description"]
+										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}
+								});									
+							}
+    						});
+				})
+			}
+		});
+		// scatter plots : circle glyphs
+		$("g[id^='plot'] circle").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				var t = this
+				var val = (t.getAttribute("data-value")).replace(/'/g,"");
+				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
+				var s = t.getAttribute("data-start");
+				var e = t.getAttribute("data-end");
+				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+				$(this).bind("click", function(){
+					document.getElementById("gene_info").style.display = "block";
+					
+					$.ajax({
+        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    					}).then(function(data1) {
+						console.debug(data1)
+							if (data1.mappings.length == 0){
+								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else {
+								var ms = data1["mappings"][0]["mapped"]["start"]
+    								var me = data1["mappings"][0]["mapped"]["end"]
+								$.ajax({
+									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    						}).then(function(data2) {
+									console.debug(data2)
+									if (data2.length == 0){
+									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}else {
+										console.debug(data2[0]['external_name'])
+										console.debug(data2[0]['gene_id'])
+										console.debug(data2[0]['biotype'])
+										console.debug(data2[0]['description'])
+										var n = data2[0]['external_name']
+										var i = data2[0]["gene_id"]
+										var b = (data2[0]["biotype"]).replace("_", " ")
+										var d = data2[0]["description"]
+										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}
+								});									
+							}
+    						});
+				})
+			}
+		});
+		// scatter plots: rectangle glyphs
+		$("g[id^='plot'] rectangle").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				var val = this.getAttribute("data-value");
+				var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
+				var s = this.getAttribute("data-start");
+				var e = this.getAttribute("data-end");
+				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+				$(this).bind("click", function(){
+					document.getElementById("gene_info").style.display = "block";
+					
+					$.ajax({
+        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    					}).then(function(data1) {
+						console.debug(data1)
+							if (data1.mappings.length == 0){
+								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else {
+								var ms = data1["mappings"][0]["mapped"]["start"]
+    								var me = data1["mappings"][0]["mapped"]["end"]
+								$.ajax({
+									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    						}).then(function(data2) {
+									console.debug(data2)
+									if (data2.length == 0){
+									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}else {
+										console.debug(data2[0]['external_name'])
+										console.debug(data2[0]['gene_id'])
+										console.debug(data2[0]['biotype'])
+										console.debug(data2[0]['description'])
+										var n = data2[0]['external_name']
+										var i = data2[0]["gene_id"]
+										var b = (data2[0]["biotype"]).replace("_", " ")
+										var d = data2[0]["description"]
+										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}
+								});									
+							}
+    						});
+				})
+			}
+		});
+		// scatter plots: triangles glyphs
+		$("g[id^='plot'] polygon").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				var val = this.getAttribute("data-value");
+				var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
+				var s = this.getAttribute("data-start");
+				var e = this.getAttribute("data-end");
+				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+				$(this).bind("click", function(){
+					document.getElementById("gene_info").style.display = "block";
+					
+					$.ajax({
+        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
+    					}).then(function(data1) {
+						console.debug(data1)
+							if (data1.mappings.length == 0){
+								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else {
+								var ms = data1["mappings"][0]["mapped"]["start"]
+    								var me = data1["mappings"][0]["mapped"]["end"]
+								$.ajax({
+									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
+		    						}).then(function(data2) {
+									console.debug(data2)
+									if (data2.length == 0){
+									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}else {
+										console.debug(data2[0]['external_name'])
+										console.debug(data2[0]['gene_id'])
+										console.debug(data2[0]['biotype'])
+										console.debug(data2[0]['description'])
+										var n = data2[0]['external_name']
+										var i = data2[0]["gene_id"]
+										var b = (data2[0]["biotype"]).replace("_", " ")
+										var d = data2[0]["description"]
+										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									}
+								});									
+							}
+    						});
+				})
+			}
+		});
+		// links
+		$("#track_0 path").each(function(i,v) {
+			var chr1 = (this.getAttribute("data-chr1")).replace(/'/g,"");
+			var s1 = this.getAttribute("data-start1");
+			var e1 = this.getAttribute("data-end1");
+			var chr2 = (this.getAttribute("data-chr2")).replace(/'/g,"");
+			var s2 = this.getAttribute("data-start2");
+			var e2 = this.getAttribute("data-end2");
+			$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+		});
+	} else {
+		$("g[id^='plot'] path").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				$(this).tooltip('destroy');
+				$(this).unbind("click");
+			}
+		});
+		$("g[id^='plot'] text").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				$(this).tooltip('destroy');
+				$(this).unbind("click");
+			}
+		});
+		$("g[id^='plot'] circle").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				$(this).tooltip('destroy');
+				$(this).unbind("click");
+			}
+		});
+		$("g[id^='plot'] rectangle").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				$(this).tooltip('destroy');
+				$(this).unbind("click");
+			}
+		});
+		$("g[id^='plot'] polygon").each(function(i,v) {
+			id = $(this).parent()[0].id;
+			if (id.search('axis')==-1){
+				$(this).tooltip('destroy');
+				$(this).unbind("click");
+			}
+		});
+	}
+}
+/*function interaction(){
+	
+	if(document.getElementById('val').checked){
+		console.debug('adding tooltip');
+	// info about tracks value
 				// histograms & heatmaps
 				$("g[id^='plot'] path").each(function(i,v) {
 					id = $(this).parent()[0].id;
@@ -367,339 +986,21 @@ function getImage () {
 					var s2 = this.getAttribute("data-start2");
 					var e2 = this.getAttribute("data-end2");
 					$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				});							
-			}
-        }
-      });
+				});
+	}
+	else{
+		//console.debug('tooltip: OFF');
+	}
+
+		
+				
+	}
+	else{
+		console.debug('highlights: OFF');
+		$("#ideograms text").unbind(mouseover, mouseout, click);
+	}
 }
-
-/*******************************************
-****					****
-****	    	INTERACTIVITY 		****
-****					****
-********************************************/
-//$(document).ready(function(){
-   //$(".ttip").tooltip();
-//});
-$(document).ready(function() {
-		
-	
-	$('.btn').on('click', function() {
-		$('.btn.active').removeClass('active');	
-		$(this).addClass('active');
-
-		var svg = $('#image_svg').find('svg')[0];
-		var g = $('#image_svg').find('g');
-		var ideogram = $('svg').find('g')[0];
-		
-		var emphasized = {}
-		console.debug(emphasized)
-		
-
-		if ($("#emphasize").hasClass("active")) {
-			//ideogram
-			$("#ideograms text").on({
-				mouseover: function() {
-					var x = this.getAttribute("x");
-					if (emphasized[x]) {
-						console.debug('texte already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('text not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[x] = style;
-						$(this).css('fill', 'crimson');
-						$(this).css('font-size', '60');
-					}
-					
-				},
-				mouseout: function() { 
-					var x = this.getAttribute("x")
-					$(this).attr("style", emphasized[x]);
-					delete emphasized[x];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var x = this.getAttribute("x");
-						$(this).attr("style", emphasized[x]);
-						$(this).removeAttr('id');
-						delete emphasized[x];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)			
-				},
-
-			});
-
-			//plots-axis
-			$("g[id^='plot'][id$='-axis'] path").on({
-				mouseover: function() {
-					var d = this.getAttribute("d");	
-					var style = this.getAttribute("style");
-					emphasized[d] = style;
-					$(this).attr("style", emphasized[d]);
-				},
-				mouseout: function() {
-					var d = this.getAttribute("d");
-					$(this).attr("style", emphasized[d]);
-					delete emphasized[d];
-				},
-			});
-			
-
-			//plots
-			$("g:not([id$='-axis'])[id^='plot'] path").on({
-				mouseover: function() {
-					var d = this.getAttribute("d");
-					console.debug($("g[id^='plot']:not([id$='-axis'])"))
-					//emphasize					
-					if (emphasized[d]) {
-						console.debug('path already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('path not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[d] = style;
-						$(this).css('fill', 'crimson');
-						if (this.getAttribute("class") == "tile") {
-							$(this).css('stroke', 'crimson');
-							$(this).css('stroke-width', '5.0');
-						}
-					}		
-				},
-				mouseout: function() {
-					var d = this.getAttribute("d")
-					$(this).attr("style", emphasized[d]);
-					delete emphasized[d];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var d = this.getAttribute("d");
-						$(this).attr("style", emphasized[d]);
-						$(this).removeAttr('id');
-						delete emphasized[d];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)
-				}
-			});
-			
-			//scatter plots
-			$("g:not([id$='-axis'])[id^='plot'] circle").on({
-				mouseover: function() {
-					var cx = this.getAttribute("cx");
-					//emphasized
-					if (emphasized[cx]) {
-						console.debug('path already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('path not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[cx] = style;
-						$(this).css('fill', 'crimson')		
-						$(this).css('stroke', 'fireBrick');
-						$(this).css('stroke-width', '3.0');
-					}	
-				},
-				mouseout: function() {
-					var cx = this.getAttribute("cx")
-					$(this).attr("style", emphasized[cx]);
-					delete emphasized[cx];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var cx = this.getAttribute("cx");
-						$(this).attr("style", emphasized[cx]);
-						$(this).removeAttr('id');
-						delete emphasized[cx];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)
-				}
-			});
-
-
-			//scatter plots
-			$("g:not([id$='-axis'])[id^='plot'] polygon").on({
-				mouseover: function() {
-					var cx = this.getAttribute("cx");
-					//emphasized
-					if (emphasized[cx]) {
-						console.debug('path already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('path not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[cx] = style;
-						$(this).css('fill', 'crimson')		
-						$(this).css('stroke', 'fireBrick');
-						$(this).css('stroke-width', '3.0');
-					}	
-				},
-				mouseout: function() {
-					var cx = this.getAttribute("cx")
-					$(this).attr("style", emphasized[cx]);
-					delete emphasized[cx];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var cx = this.getAttribute("cx");
-						$(this).attr("style", emphasized[cx]);
-						$(this).removeAttr('id');
-						delete emphasized[cx];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)
-				}
-			});
-
-			//scatter plots
-			$("g:not([id$='-axis'])[id^='plot'] rectangle").on({
-				mouseover: function() {
-					var cx = this.getAttribute("cx");
-					//emphasized
-					if (emphasized[cx]) {
-						console.debug('path already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('path not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[cx] = style;
-						$(this).css('fill', 'crimson')		
-						$(this).css('stroke', 'fireBrick');
-						$(this).css('stroke-width', '3.0');
-					}	
-				},
-				mouseout: function() {
-					var cx = this.getAttribute("cx")
-					$(this).attr("style", emphasized[cx]);
-					delete emphasized[cx];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var cx = this.getAttribute("cx");
-						$(this).attr("style", emphasized[cx]);
-						$(this).removeAttr('id');
-						delete emphasized[cx];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)
-				}
-			});
-
-			$("g:not([id$='-axis'])[id^='plot'] text").on({
-				mouseover: function() {
-					var x = this.getAttribute("x");
-					//emphasized					
-					if (emphasized[x]) {
-						console.debug('texte already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('text not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[x] = style;
-						$(this).css('fill', 'crimson');
-					}
-	
-				},
-				mouseout: function() { 
-					var x = this.getAttribute("x")
-					$(this).attr("style", emphasized[x]);
-					delete emphasized[x];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var x = this.getAttribute("x");
-						$(this).attr("style", emphasized[x]);
-						$(this).removeAttr('id');
-						delete emphasized[x];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-					}
-					console.debug(emphasized)			
-				},
-			});
-			
-			//links
-			$("#track_0 path").on({
-				mouseover: function() {
-					var d = this.getAttribute("d");
-					if (emphasized[d]) {
-						console.debug('path already emphasized')
-						$(this).attr('id', 'e');	// emphasized already
-					} else {
-						console.debug('path not emphasized');
-						var style = this.getAttribute("style");
-						emphasized[d] = style;
-						$(this).css('stroke', 'crimson');
-						$(this).css('stroke-width', '7')
-					}
-						
-				},
-				mouseout: function() {
-					var d = this.getAttribute("d")
-					$(this).attr("style", emphasized[d]);
-					delete emphasized[d];
-					console.debug(emphasized)
-				},
-				click: function() {
-					if (this.getAttribute("id") == "e") {		// back un-emphasized
-						var d = this.getAttribute("d");
-						$(this).attr("style", emphasized[d]);
-						$(this).removeAttr('id');
-						delete emphasized[d];	
-					} else {
-						$(this).off('mouseout');		// keep emphasized
-						
-					}
-					console.debug(emphasized)
-				}
-			});
-			
-
-
-			
-		}	
-	});
-
-	$("#image_svg").panzoom({
- 		//$zoomIn: $("#zoom-in"),
-  		//$zoomOut: $("#zoom-out"),
-	});	
-});
-
-function zoom(val){
-	console.debug(val)
-	var svg = $('#image_svg').find('svg')[0];
-	var v = val + "%"
-	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
-	document.getElementById("perc").innerHTML = v;
-	svg.setAttribute('width', v);
-	svg.setAttribute('height', v);
-	svg.setAttribute('viewBox', vb.join(" "))
-};
-
-function reset() {
-	document.location.reload(true);
-	console.debug('refreshed');
-};
-
+*/
 
 		
 </script>
