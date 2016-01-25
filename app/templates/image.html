@@ -9,6 +9,12 @@
 {% block help %}
 <center><h3>Generated Circos</h3></center>
 <p>Each of your generated circos will have a <b>unique ID</b> assossiated to it. This ID is a three-part-numerical code. In the event that you get an error message while generating a Circos, take note of the ID: we can trace back the problem that cause the error. You will then be able to make the appropriate change(s). </p>
+<p>You can dowload the generated circos in different format.</p>
+<p><ul>
+  <li>By clicking on <b><span class="glyphicon glyphicon-floppy-save"></span></b> you can download the <b>svg</b> (Scalable Vector Graphics) version of your circos as currently see on your monitor i.e. if you zoom too much, you will not have a complete image, and if you apply highlights, they will be displayed</li>
+  <li>If you want to access the configuration filed used to generate your circos, you can dowload a compressed <b>zip</b> package by clicking on <b><span class="glyphicon glyphicon-duplicate"></span></b>: this package contains every file used to make the image (.txt and .conf). You can then make modification(s) and upload the package to generate a new and improve Circos. <em>This option is only available for circos generated from data files i.e. not for those generated from configuration package.</em></li>
+  <li>Finally, if the image is not what you wanted and would like to dispose of it, you can always delete it by clicking on <b><span class="glyphicon glyphicon-trash"></span></b>. </li>
+</ul></p>
 
 <center><h3>The Image</h3></center>
 <p>If you generated the image by uploading data file(s), the Circos will have pre-defined attributes and parameters set by the interface.</p> 
@@ -34,14 +40,14 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 <p>To hide the details block, just click the <em>x</em> button; to show it, click the button labelled <em>Details</em>.</p>
 
 <center><h3>Options</h3></center>
-<h4><font color="#6495ED">Download</font></h4>
-<p>Once a Circos is generated, you always have the option to download its <b>SVG</b> image (Scalable Vector Graphics). If the Circos is of type <em>Data file(s)</em>, you also have the option to download a <b>compressed package (.zip)</b>: this package contains every file used to make the image (.txt and .conf). You can then make modification(s) and upload the package to generate a new and improve Circos.</p>
-<h4><font color="#6495ED">Delete</font></h4>
-<p>You can delete any of your Circos. However, please note that one deleted, a Circos and its related files can not be retrieved.</p>
-<h4><font color="#6495ED">Actions on the image</font></h4>
-<p>You can <b>zoom</b> up to 250% of the image by adjusting the zoom range-bar. By default, the image is set to 100%.</p>
-<p>You also have the option to <b>highligth</b> any value of your Circos. Press the <em>Highlight</em> button and then the desired value: histogram bins, circles and tiles will be filled in red, and labels will be red.</p>
-<p>To come back to your original Circos, click the <b>Reset</b> button: the modifications are only superficial, meaning that there are not saved as a new image. </p>
+<h4><font color="#6495ED">Zoom</font></h4>
+<p>You can <b>zoom</b> up to 250% of the image by adjusting the zoom range-bar. By default, the image is set to 100%. The svg won't be modified, but you can download a specific zoom as mentionned above.</p>
+<h4><font color="#6495ED">Highlights</font></h4>
+<p>You also have the option to <b>highligth</b> any value of your Circos. Turn the <em>Highlights</em> button <b>ON</b> and select the desired value: histogram bins, circles and tiles will be filled in red, and labels will have a red font.</p>
+<p>To come back to your original Circos, click the <b>Reset</b> button: the modifications are only superficial, meaning that there are not saved as a new image. You can however download the modified image: refer to <em>Generated Circos</em></p>
+<h4><font color="#6495ED">Values & Gene Information</font></h4>
+<p>By turning this switch <b>ON</b>, you are able to view the values of each track directly on the circos. To do so, hover you mouse on the image and blue bubbles will appear with the <b>value</b>,  <b>chromosome</b> and <b>position</b> for track, and <b>name</b>,  <b>chromosome</b> and <b>position</b> for labels. By clicking on the desired region, a request will be sent to look for possible gene with these specific positions: if there is a match, the information will be displayed in a new box above the reset button. These are indicators.</p>
+<p><em>If you are generated a circos from a configuration package, you must select the organism corresponding the displayed data: homo sapien or mouse. This option will be disabled if you are generating from data files.</em></p>
 {% endblock %}
 
 {% block header %}
@@ -51,28 +57,19 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 {% block content %}
 <div class="row">
 	<div class="col-md-8">
-		<div class='svg' id='image_svg' display="block" margin="auto"></div>
+		{% if user != 'Guest' %}
+		<button class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#delete_confirm" title="Delete"><span class="glyphicon glyphicon-trash"></span></button>
+		{% else %}
+		<button class="btn btn-default btn-sm pull-right disabled" type="button" data-toggle="modal" data-target="#delete_confirm" title="Delete"><span class="glyphicon glyphicon-trash"></span></button>
+		{% endif%}
+		{% if 'ata' in type %}
+			<a class="btn btn-default btn-sm pull-right" href="/download/{{ unique }}/circos.zip" title="Download ZIP"><span class="glyphicon glyphicon-duplicate"></span></a>
+		{% else %}
+			<a class="btn btn-default btn-sm pull-right disabled" href="/download/{{ unique }}/circos.zip" title="Download ZIP"><span class="glyphicon glyphicon-duplicate"></span></a>
+		{% endif %}
+		<button class="btn btn-default btn-sm pull-right" id="save_as_svg" value="" title="Download SVG"><span class="glyphicon glyphicon-floppy-save"></span></button>
 	</div>
 	<div class="col-md-4">
-		<div class="row" >
-			<div class="col-md-7">
-				<button id='dLabel' type='button' class="btn btn-primary dropdown-toggle" data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Downloads<span class='caret'></span></button>
-  				<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel'>
-					<li><a href="/download/{{ unique }}/circos_{{ unique }}.svg">Circos.svg</a></li>
-					{% if 'ata' in type %}
-    					<li><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
-					{% else %}
-					<li class='disabled'><a href="/download/{{ unique }}/circos.zip">Circos.zip</a></li>
-					{% endif %}
-				</ul>
-			</div>
-			<div class="col-md-3">				
-				<button class="btn btn-danger pull-right" role='button' data-toggle="modal" data-target="#delete_confirm">Delete</button>
-			</div>
-			<div class="col-md-10">
-				<hr>
-			</div>
-		</div>
 		<!-- Zoom -->
 		<div class="row">
 			<div class="col-md-10">
@@ -80,8 +77,13 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<input type="range" id="zoom-range" min="50" max="250" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
 			</div>		
 		</div>
-		<br>
-
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-8">
+		<div class='svg' id='image_svg' display="block" margin="auto"></div>
+	</div>
+	<div class="col-md-4">
 		{% if 'Tabular' not in type %}
 		<!-- Enable Highlights -->
 		<div class="row" >
@@ -89,27 +91,39 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<label for="highlights"><font color="#0088cc">Highlights</font></label> 
 			</div>
 			<div class="col-md-5">				
-				<input id="highlights" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="h()">
+				<input class="disabled" id="highlights" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="h()">
 			</div>
 		</div>
+		{% endif %}
 
-		<!-- Tooltip info -->
-		<div class="row" >
-			<div class="col-md-5">
-				<label for="gene_info"><font color="#0088cc">Values & Gene Information</font></label> 
+		{% if 'Tabular' not in type %}
+		<div style="display:block">
+		{% else %}
+		<div style="display:none">
+		{% endif %}
+			<!-- Tooltip info -->
+			<div class="row" >
+				<div class="col-md-5">
+					<label for="gene_info"><font color="#0088cc">Values & Gene Information</font></label> 
+				</div>
+				<div class="col-md-5">				
+					<input id="val" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="v()" >
+				</div>
 			</div>
-			<div class="col-md-5">				
-				<input id="val" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="v()" >
-			</div>
-		</div>
 		
-		<div class="row">
-			<div class="col-md-5">
-				<label for="species"><font color="#0088cc">Gene information for: &nbsp&nbsp&nbsp</font></label> 
-			</div>
-			<div class="col-md-5">
-				<input type='radio' name='species' id='species' value='human' checked>&nbspHomo sapiens<br> 				
-				<input type='radio' name='species' id='species' value='mouse'>&nbspMouse
+			<div class="row">
+				<div class="col-md-5">
+					<label for="species"><font color="#0088cc">Gene information for: &nbsp&nbsp&nbsp</font></label> 
+				</div>
+				<div class="col-md-5">
+					{% if 'onfig' in type %}
+						<input type='radio' name='species' id='species' value='human' checked>&nbspHomo sapiens<br> 				
+						<input type='radio' name='species' id='species' value='mouse'>&nbspMouse
+					{% else %}
+						<input type='radio' name='species' id='species' value='human' disabled>&nbspHomo sapiens<br> 				
+						<input type='radio' name='species' id='species' value='mouse' disabled>&nbspMouse
+					{% endif %}
+				</div>
 			</div>
 		</div>
 		
@@ -120,6 +134,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<div class="panel panel-default">
     					<div class="panel-body" >
 						<button type="button" class="close" onclick="close_panel('gene_info')">&times;</button>
+						<center><font color="#0088cc"><b><u> About Gene(s) </u></b></font></center>
 						<div class="panel-body-gi">
 						</div>
 					</div>
@@ -134,13 +149,13 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<hr>
 			</div>
 		</div>
-		{% endif %}
+		<br>
 
 		<!-- hidden -->
 		<div class="row" id ="show_l" style="display:none">
 			<div class="row">
 				<div class="col-md-10">
-					<center><button class="astext" onclick="show_panel('legend')">Show Legend</center>
+					<center><button class="astext btn btn-default btn-sm" onclick="show_panel('legend')">Show Legend</center>
 				</div>
 			</div>			
 		<br>
@@ -149,7 +164,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 		<div class="row" id ="show_d" style="display:none">
 			<div class="row">
 				<div class="col-md-10">
-					<center><button class="astext" onclick="show_panel('details')">Show Details</center>
+					<center><button class="astext btn btn-default btn-sm" onclick="show_panel('details')">Show Details</center>
 				</div>
 			</div>
 		</div>
@@ -193,7 +208,12 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 	</div>
 </div>
 
-
+<!-- Hidden <FORM> to submit the SVG data to the server, which will convert it to SVG/PDF/PNG downloadable file.
+     The form is populated and submitted by the JavaScript below. -->
+<form id="svgform" method="post" action="/download_highlights/{{ unique }}">
+	<input type="hidden" id="output_format" name="output_format" value=""></input>
+	<input type="hidden" id="data" name="data" value=""></input>
+</form>
 
 
 <!-- delete modal -->
@@ -214,6 +234,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 	</div>
 </div>
 {% endblock%}
+
 
 {% block script %}
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -249,6 +270,30 @@ function show_panel(id) {
 	}
 }
 
+/*******************************************
+****					****
+****	    	Download		****
+****					****
+********************************************/
+$("#save_as_svg").click(function() { 
+	submit_download_form('svg');
+});
+
+function submit_download_form(output_format){
+	//get the svg element
+	var tmp = document.getElementById("image_svg");
+	var svg = tmp.getElementsByTagName("svg")[0];
+
+	// Extract the data as SVG text string
+	var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+	// Submit the <FORM> to the server.
+	// The result will be an attachment file to download.
+	var form = document.getElementById("svgform");
+	form['output_format'].value = output_format;
+	form['data'].value = svg_xml ;
+	form.submit();
+}
 
 /*******************************************
 ****					****
@@ -295,7 +340,7 @@ function getImage () {
  	   		console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
-				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div><p><center>Do not close this current tab while your Circos is beeing generated. You will receive an e-mail once the task is done.</center></p></div>');
+				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
 				{% endblock%} 	   		
 			}
 
@@ -327,13 +372,16 @@ $(document).ready(function() {
 	$("[name='switch']").bootstrapSwitch();	
 });
 
+$('.tooltip').tooltip('hide'),
 $("#image_svg").panzoom({
- 	//$zoomIn: $("#zoom-in"),
-  	//$zoomOut: $("#zoom-out"),
+	//$zoomIn: $("#zoom-in"),
+	//$zoomOut: $("#zoom-out"),
 });
+
 
 function zoom(val){
 	console.debug(val)
+	//$('.tooltip').tooltip('hide');
 	var svg = $('#image_svg').find('svg')[0];
 	var v = val + "%"
 	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
@@ -361,11 +409,14 @@ function h(){
 				var x = this.getAttribute("x");
 				if (emphasized[x]) {
 					$(this).attr('id', 'e');	// emphasized already
+					console.debug("mouseenter: already emphasized")
 				} else {
 					var style = this.getAttribute("style");
 					emphasized[x] = style;
 					$(this).css('fill', 'crimson');
 					$(this).css('font-size', '60');
+					console.debug("mouseenter: not already emphasized")
+					
 				}
 			
 			},
@@ -373,15 +424,29 @@ function h(){
 				var x = this.getAttribute("x")
 				$(this).attr("style", emphasized[x]);
 				delete emphasized[x];
+				console.debug("mouseleave")
 			},
 			click: function() {
 				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					console.debug(emphasized)
 					var x = this.getAttribute("x");
 						$(this).attr("style", emphasized[x]);
 					$(this).removeAttr('id');
-					delete emphasized[x];	
+					console.debug(x)
+					delete emphasized[x];
+					$(this).bind({
+						mouseleave: function() { 
+							var x = this.getAttribute("x")
+							$(this).attr("style", emphasized[x]);
+							delete emphasized[x];
+							console.debug("mouseleave")
+						},
+					});
+					console.debug(emphasized)
+					console.debug("click: un-emphasized")	
 				} else {
-					$(this).off('mouseleave');		// keep emphasized
+					$(this).unbind('mouseleave');		// keep emphasized
+					console.debug("click: already emphasized")
 				
 				}			
 			},
@@ -427,7 +492,14 @@ function h(){
 					var d = this.getAttribute("d");
 					$(this).attr("style", emphasized[d]);
 					$(this).removeAttr('id');
-					delete emphasized[d];	
+					delete emphasized[d];
+					$(this).bind({					
+						mouseleave: function() {
+							var d = this.getAttribute("d")
+							$(this).attr("style", emphasized[d]);
+							delete emphasized[d];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized					
 				}
@@ -458,7 +530,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({					
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -490,7 +569,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -522,7 +608,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},	
+					});
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -536,16 +629,19 @@ function h(){
 				//emphasized					
 				if (emphasized[x]) {
 					$(this).attr('id', 'e');	// emphasized already
+					console.debug("mouseenter: already emphasized")
 				} else {
 					var style = this.getAttribute("style");
 					emphasized[x] = style;
 					$(this).css('fill', 'crimson');
+					console.debug("mouseenter: not already emphasized")
 				}
 				},
 			mouseleave: function() { 
 				var x = this.getAttribute("x")
 				$(this).attr("style", emphasized[x]);
 				delete emphasized[x];
+				console.debug("mouseleave")
 			},
 			click: function() {
 				if (this.getAttribute("id") == "e") {		// back un-emphasized
@@ -553,8 +649,17 @@ function h(){
 					$(this).attr("style", emphasized[x]);
 					$(this).removeAttr('id');
 					delete emphasized[x];
+					$(this).bind({
+						mouseleave: function() { 
+							var x = this.getAttribute("x")
+							$(this).attr("style", emphasized[x]);
+							delete emphasized[x];
+						},
+					});
+					console.debug("click: um-emphasized")
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
+					console.debug("click: emphasized")
 				}			
 			},
 		});
@@ -581,7 +686,14 @@ function h(){
 					var d = this.getAttribute("d");
 					$(this).attr("style", emphasized[d]);
 					$(this).removeAttr('id');
-					delete emphasized[d];	
+					delete emphasized[d];
+					$(this).bind({
+						mouseleave: function() {
+							var d = this.getAttribute("d")
+							$(this).attr("style", emphasized[d]);
+							delete emphasized[d];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -617,6 +729,9 @@ function v(){
 				var e = t.getAttribute("data-end");
 				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -624,7 +739,9 @@ function v(){
     					}).then(function(data1) {
 						console.debug(data1)
 							if (data1.mappings.length == 0){
-								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else if (data1.mappings.length > 1){
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 							}else {
 								var ms = data1["mappings"][0]["mapped"]["start"]
     								var me = data1["mappings"][0]["mapped"]["end"]
@@ -633,7 +750,7 @@ function v(){
 		    						}).then(function(data2) {
 									console.debug(data2)
 									if (data2.length == 0){
-									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 									}else {
 										console.debug(data2[0]['external_name'])
 										console.debug(data2[0]['gene_id'])
@@ -654,14 +771,19 @@ function v(){
 		// labels
 		$("g[id^='plot'] text").each(function(i,v) {
 			id = $(this).parent()[0].id;
+			console.debug('DONE')
 			if (id.search('axis')==-1){
 				var t = this
 				var val = (t.getAttribute("data-value")).replace(/'/g,"");
 				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
 				var s = t.getAttribute("data-start");
 				var e = t.getAttribute("data-end");
-				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', trigger: 'hover', placement: "auto left", html:'true'});
+				//$(this).attr('title', "<b>" + val + "</b><br>" + chr + ": " + s + "-" + e)
+				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: "body", trigger: 'hover', placement: "auto left", html:'false'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -669,7 +791,9 @@ function v(){
     					}).then(function(data1) {
 						console.debug(data1)
 							if (data1.mappings.length == 0){
-								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else if (data1.mappings.length > 1){
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 							}else {
 								var ms = data1["mappings"][0]["mapped"]["start"]
     								var me = data1["mappings"][0]["mapped"]["end"]
@@ -678,7 +802,7 @@ function v(){
 		    						}).then(function(data2) {
 									console.debug(data2)
 									if (data2.length == 0){
-									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 									}else {
 										console.debug(data2[0]['external_name'])
 										console.debug(data2[0]['gene_id'])
@@ -707,6 +831,9 @@ function v(){
 				var e = t.getAttribute("data-end");
 				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -714,7 +841,9 @@ function v(){
     					}).then(function(data1) {
 						console.debug(data1)
 							if (data1.mappings.length == 0){
-								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else if (data1.mappings.length > 1){
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 							}else {
 								var ms = data1["mappings"][0]["mapped"]["start"]
     								var me = data1["mappings"][0]["mapped"]["end"]
@@ -723,7 +852,7 @@ function v(){
 		    						}).then(function(data2) {
 									console.debug(data2)
 									if (data2.length == 0){
-									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 									}else {
 										console.debug(data2[0]['external_name'])
 										console.debug(data2[0]['gene_id'])
@@ -751,6 +880,9 @@ function v(){
 				var e = this.getAttribute("data-end");
 				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -758,7 +890,9 @@ function v(){
     					}).then(function(data1) {
 						console.debug(data1)
 							if (data1.mappings.length == 0){
-								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else if (data1.mappings.length > 1){
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 							}else {
 								var ms = data1["mappings"][0]["mapped"]["start"]
     								var me = data1["mappings"][0]["mapped"]["end"]
@@ -767,7 +901,7 @@ function v(){
 		    						}).then(function(data2) {
 									console.debug(data2)
 									if (data2.length == 0){
-									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 									}else {
 										console.debug(data2[0]['external_name'])
 										console.debug(data2[0]['gene_id'])
@@ -795,6 +929,9 @@ function v(){
 				var e = this.getAttribute("data-end");
 				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -802,7 +939,9 @@ function v(){
     					}).then(function(data1) {
 						console.debug(data1)
 							if (data1.mappings.length == 0){
-								document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+							}else if (data1.mappings.length > 1){
+								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 							}else {
 								var ms = data1["mappings"][0]["mapped"]["start"]
     								var me = data1["mappings"][0]["mapped"]["end"]
@@ -811,7 +950,7 @@ function v(){
 		    						}).then(function(data2) {
 									console.debug(data2)
 									if (data2.length == 0){
-									document.getElementById("gi").append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
+									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
 									}else {
 										console.debug(data2[0]['external_name'])
 										console.debug(data2[0]['gene_id'])
@@ -838,6 +977,11 @@ function v(){
 			var s2 = this.getAttribute("data-start2");
 			var e2 = this.getAttribute("data-end2");
 			$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+			$(this).bind("click", function(){
+				$(this).bind("mouseleave", function(){
+					$(this).tooltip("hide")
+				});
+			});
 		});
 	} else {
 		$("g[id^='plot'] path").each(function(i,v) {
@@ -877,131 +1021,6 @@ function v(){
 		});
 	}
 }
-/*function interaction(){
-	
-	if(document.getElementById('val').checked){
-		console.debug('adding tooltip');
-	// info about tracks value
-				// histograms & heatmaps
-				$("g[id^='plot'] path").each(function(i,v) {
-					id = $(this).parent()[0].id;
-					if (id.search('axis')==-1){
-						var t = this
-						var val = t.getAttribute("data-value");
-						var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-						var s = t.getAttribute("data-start");
-						var e = t.getAttribute("data-end");
-						$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-					}
-				});
-
-				// labels
-				$("g[id^='plot'] text").each(function(i,v) {
-					id = $(this).parent()[0].id;
-					if (id.search('axis')==-1){
-						var t = this
-						var val = (t.getAttribute("data-value")).replace(/'/g,"");
-						var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-						var s = t.getAttribute("data-start");
-						var e = t.getAttribute("data-end");
-						//$(t).mouseover(function(){
-							$.ajax({
-        							url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    								}).then(function(data1) {
-									//console.debug(typeof(data1))
-									console.debug(data1)
-									if (data1.mappings.length == 0){
-										$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>This position does not correspond to a gene', container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-									}
-									else {
-										var ms = data1["mappings"][0]["mapped"]["start"]
-    										var me = data1["mappings"][0]["mapped"]["end"]
-										$.ajax({
-											url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    									}).then(function(data2) {
-												console.debug(data2)
-												if (data2.length == 0){
-													$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>This position does not correspond to a gene', container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-												}
-												else {
-													console.debug(data2[0]["external_name"])
-													console.debug(data2[0]["gene_id"])
-													console.debug(data2[0]["biotype"])
-													console.debug(data2[0]["description"])
-													$(t).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e + '<br><b>Gene</b><br>Name: ' + data2[0]["external_name"].replace(/[\[\]",]+/g, "") + '<br>ID: ' + data2[0]["gene_id"].replace(/[\[\]",]+/g, "") + '<br>Biotype: ' + data2[0]["biotype"].replace(/[\[\]",]+/g, "") + '<br>Description: ' + data2[0]["description"].replace(/[\[\]",]+/g, ""), container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-												}
-												
-										});									
-									}
-    								});
-						//});
-					}
-				});
-			
-				// scatter plots : circle glyphs
-				$("g[id^='plot'] circle").each(function(i,v) {
-					id = $(this).parent()[0].id;
-					if (id.search('axis')==-1){
-						var t = this
-						var val = (t.getAttribute("data-value")).replace(/'/g,"");
-						var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-						var s = t.getAttribute("data-start");
-						var e = t.getAttribute("data-end");
-						$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-					}
-				});
-	
-				// scatter plots: triangle, square
-				$("g[id^='plot'] polygon").each(function(i,v) {
-					id = $(this).parent()[0].id;
-					if (id.search('axis')==-1){
-						var val = this.getAttribute("data-value");
-						var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
-						var s = this.getAttribute("data-start");
-						var e = this.getAttribute("data-end");
-						$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-						
-					}
-				});
-
-				// scatter plots: rectangle glyphs
-				$("g[id^='plot'] rectangle").each(function(i,v) {
-					id = $(this).parent()[0].id;
-					if (id.search('axis')==-1){
-						var val = this.getAttribute("data-value");
-						var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
-						var s = this.getAttribute("data-start");
-						var e = this.getAttribute("data-end");
-						$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-						
-					}
-				});
-
-				// links
-				$("#track_0 path").each(function(i,v) {
-					var chr1 = (this.getAttribute("data-chr1")).replace(/'/g,"");
-					var s1 = this.getAttribute("data-start1");
-					var e1 = this.getAttribute("data-end1");
-					var chr2 = (this.getAttribute("data-chr2")).replace(/'/g,"");
-					var s2 = this.getAttribute("data-start2");
-					var e2 = this.getAttribute("data-end2");
-					$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				});
-	}
-	else{
-		//console.debug('tooltip: OFF');
-	}
-
-		
-				
-	}
-	else{
-		console.debug('highlights: OFF');
-		$("#ideograms text").unbind(mouseover, mouseout, click);
-	}
-}
-*/
-
 		
 </script>
 {% endblock %}

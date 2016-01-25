@@ -16,9 +16,9 @@ from util import *
 USER = 'app/circos/usr'
 
 #make a zip file 
-def zip_circos(unique):
+def zip_circos(unique, user):
   print 'making zip file'
-  user = authenticate()
+  #user = authenticate()
  
   zip_file = zipfile.ZipFile('%s/%s/%s/circos.zip' % (USER, user, unique), "w")
   task_folder = '%s/%s/%s' % (USER, user, unique)
@@ -31,24 +31,25 @@ def zip_circos(unique):
   zip_file.close() 
 
 #adding to logs.txt
-def logs(unique):
-  print 'adding report to logs.txt'
-  user = authenticate()
-  with open("%s/%s/%s/error.txt" % (USER, user, unique)) as f:
+def logs(unique, user):
+  #user = authenticate()
+  with open("%s/%s/%s/error.txt" % (USER, user, unique), 'r') as f:
       with open("logs.txt", "a") as f1:
         f1.write('%s\t\t' % (datetime.date.today()))
         f1.write('%s\t' % (unique))
         for line in f:
             f1.write('%s .*. ' % (line)) 
         f1.write('\n')
+  print 'report added to logs.txt'
 
 #sending notification to the user
-def send_email(unique, type):
+def send_email(unique, type, state, user, host):
   print 'sending email'
   no_reply = 'circos@binfo09.iric.ca'
-  user = authenticate()
-  host = request.host_url
-  print host
+  #user = authenticate()
+  #with app.test_request_context():
+  	#host = request.host_url
+  	#print host
   
   msg = MIMEMultipart()
 
@@ -56,7 +57,11 @@ def send_email(unique, type):
   msg['From'] = no_reply
   msg['To'] = user
 
-  message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s/%s' % (host, type, unique)
+  if state == 'success':
+  	message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s/%s' % (host, type, unique)
+  elif state == 'error':
+  	message = 'An error occured while generating your Circos. Please check your file(s) and try again: %s' % (host)
+
   msg.attach(MIMEText(message, 'plain'))
 
   try:

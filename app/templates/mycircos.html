@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
+{% block help %}
+<center><h3>All in One Place</h3></center>
+<p>Here is your personnal Circos database! You can access and download every Circos you have generated so far (except those that you have already deleted, of course). You can directly download both the <b>svg</b> image and/or the <b>zip</b> package. The rendered files are those saved in you account, meaning they will not display prior highlights nor zoom-in/out done on the image. To access a Circos for manipulation and information, click on the button <em>Details</em> or on the miniaturized Circos. You can also decide to delete them all or only specific one(s). <em>Note that once deleted, a Circos and its related files can not be retrieved </em></p>
+<p>Your Circos are presented in chronological order i.e. the upper-left one being the most recent.</p>
+{% endblock %}
+
 {% block header %}
-<h1> MyCircos <small>Every previously generated Circos</small></h1>
+<h1> MyCircos <small>Every generated Circos</small></h1>
 {% endblock %}
 
 {% block content %}
@@ -11,7 +17,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-7">
 						<h4><center>{{ tup[3] }}</center></h4>
 						<p><b>Type: </b>{{ tup[1] }}</p>
 						{% if tup[4] %}
@@ -20,7 +26,7 @@
 						<p><b>ID: </b>{{ tup[0] }}</p>
 						<p><b>Description: </b>{{ tup[2] }}</p>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-5">
 						<a href="/circos_display/{{ tup[1] }}/{{ tup[0] }}">
 							<img src="{{ url_for('get_png', unique=tup[0]) }}" height=100% width=100%></img> 
 						</a>
@@ -29,7 +35,7 @@
 				<div class="row">
 					<div class="col-md-4">
 						<div class="dropdown">
-							<button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Downloads<span class="caret"></span></button>
+							<button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Downloads <span class="caret"></span></button>
 							<ul class="dropdown-menu">
 								<li><a href="/download/{{ tup[0] }}/circos_{{ tup[0] }}.svg">Circos.svg</a></li>
 								{% if 'Data' in tup[1] %}
@@ -44,7 +50,11 @@
 						<a href="/circos_display/{{ tup[1] }}/{{ tup[0] }}" class="btn btn-primary btn-sm" role="button">Details</a>
 					</div>
 					<div class="col-md-4">
+						{% if user != 'Guest' %}
 						<button class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#delete_confirm_{{ tup[0] }}"><span class="glyphicon glyphicon-trash"></span></button>
+						{% else %}
+						<button class="btn btn-default btn-sm pull-right disabled" type="button" data-toggle="modal" data-target="#delete_confirm_{{ tup[0] }}"><span class="glyphicon glyphicon-trash"></span></button>
+						{% endif %}
 					</div>					
 				</div>
 			</div>
@@ -74,13 +84,14 @@
 
 						
 						
-
+{% if user != 'Guest' %}
 <div class="row">
 	<div class="col-md-1">
 		<a  class="btn btn-danger " role="button" data-toggle="modal" data-target="#delete_all_confirm">Delete All</a>
-		<br><br>
+		<br><br><br>
 	</div>
 </div>
+{% endif %}
 
 <!-- delete-all modal -->
 <div class="modal fade" id="delete_all_confirm" role="dialog">

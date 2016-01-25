@@ -53,7 +53,14 @@ def logged():
     session['logged_in'] = True
     return redirect(url_for('data'))
   return redirect(url_for('error', template='home', error='Email address is invalid. Please try again or register.'))
-  
+
+#action: continue as user
+@app.route('/logged/guest', endpoint='logged_guest')
+def logged_guest():
+  registered_user = User.query.filter_by(email="Guest").first()
+  login_user(registered_user)
+  session['logged_in'] = True
+  return redirect(url_for('data'))
 
 #action: registering
 @app.route('/registered', methods=['GET', 'POST'], endpoint='registered')

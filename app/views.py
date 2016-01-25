@@ -30,12 +30,11 @@ from .models import User, Circos
 
 #dictionary for running processes
 process = {}
+tasks = {}
 
 #paths
 CONF = 'app/circos'
 USER = 'app/circos/usr'
-
-#global C_R = ''
 
 
 ####################################################
@@ -97,14 +96,6 @@ def image(img):
 @app.route('/generate/data/', endpoint='data')
 @login_required
 def data():
-  test.run('run')
-  test.apply('apply')
-  test.delay('delay')
-
-  add.run(1,4)
-  add.apply(10,40)
-  add.delay(60,40)
-
   return render_template('index_data.html', title='Circos-Data')
 
 
@@ -277,9 +268,8 @@ def index_data():
 
     #generating the configuration files and the image
     generate(unique=unique, plots=plots, links=links, values=values)
-    print "************************" + user + "************************"
-    circos.delay('%s/circos.conf' % (TASK), unique, user)
-    #print C_R.ready()
+    c_r = circos.delay('%s/circos.conf' % (TASK), unique, user, 'data', current_user.id, request.host_url)
+    tasks[unique] = c_r
     return redirect(url_for('circos_display', type='data', unique=unique))
   return redirect(url_for('error', template='index_data', error='An error occured while loading your file(s). Please try again'))
    
@@ -325,12 +315,13 @@ def index_config():
 
       #look for circos.conf
       if os.path.exists(CIR_CONF):
-        print 'specific conf'
-	specific(unique)
-	circos(CIR_CONF, unique)
-	#writing info.txt
+        #writing info.txt
 	with open(INFO, 'a' ) as f:
 	  f.write('Type: Configuration files\nDescription: %s\n\nDate: %s\nID: %s\nZIP: %s\n\n' % (request.values['comments'], datetime.date.today(), unique, folder_filename))
+	print 'specific conf'
+	specific(unique)
+	c_r = circos.delay(CIR_CONF, unique, user, 'conf', current_user.id, request.host_url)
+        tasks[unique] = c_r
 	return redirect(url_for('circos_display', type='configuration', unique=unique))
       else:
 	return redirect(url_for('error', template='index_config', error='No circos.conf found. Please define your main configuration file as circos.conf.'))	      
@@ -463,12 +454,8 @@ def index_tabular():
 	  parse.write(uploaded[x])  
 
       #parse table + make conf 
-      print 'parsing table'
-      cmd_table = 'cat %s | parse-table -conf %s > %s/parsed.txt' % (to_parse, parse_table, TASK)
-      subprocess_cmd(cmd_table)
-      cmd_check = 'cat %s/parsed.txt' % (TASK)
-      subprocess_cmd(cmd_check)
-      
+      c_r = tabular_circos.delay(to_parse, parse_table, TASK, unique, user, current_user.id, request.host_url)
+      tasks[unique] = c_r
       return redirect(url_for('circos_display', type='tabular', unique=unique))
     return redirect(url_for('error', template='index_tabular', error='File missing or with wrong extension. Please upload your file.'))
   return redirect(url_for('error', template='index_tabular', error='An error occured while uploading your files. Please upload your files.')) 
@@ -495,7 +482,7 @@ def circos_display(type, unique):
   else:
     lines_legend = []
   print type
-  return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, type=type)
+  return render_template('image.html', lines_info=lines_info, lines_legend=lines_legend, unique=unique, type=type, user=user)
 
 
 ####################################
@@ -516,11 +503,6 @@ def get_svg(unique, type):
   PNG = '%s/circos_%s.png' % (TASK, unique)
   CIR_CONF = '%s/circos.conf' % (TASK)
   content = '' 
-  
-  print circos.request.id
-  print circos.AsyncResult(circos.request.id).state
-  
-  #print test.AsyncResult(test.request.id).state
 
   #previous circos
   if os.path.isfile(SVG) and not Circos.query.filter_by(svg=unique).first() is None:
@@ -528,66 +510,35 @@ def get_svg(unique, type):
     print Circos.query.filter_by(svg=unique).first()
     content = open(SVG).read()
     return content
-
-  #start spinning wheel (always false)
-  elif not os.path.isfile(TAB):
-    with open(TAB, 'a'):
-      return content
  
   #current circos
   else:
     print 'getting current circos'
-    # if true, tabular circos -> need to create conf and launch circos
-    if 'tabular' in type:
-      print 'make-conf'
-      cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s; > %s/error.txt' % (TASK, TASK, TASK)
-      subprocess_cmd(cmd_conf)
-      #circos
-      if file_ready(ERROR):
-        print 'specific tabular'
-        specific(unique)
-        circos(CIR_CONF, unique)
-    
-    p = process.get('%s_circos' % (unique), 'None')
-    if os.path.isfile('process.txt'): #if file is there, then circos is still running
+    #look if task is complete
+    results = circos.AsyncResult(tasks[unique].id)
+    print results.ready()
+    if not results.ready(): #process not completed
       return content
 
-    else:
-      print 'looking for error in circos'
+    elif results.ready():
+      #print 'looking for error in circos'
       #look for any error
-      file_ready(ERROR)
-      logs(unique)
-      with open(ERROR, 'r') as f:
-        for line in f:
-          if '*** CIRCOS ERROR ***' in line:
-            content = 'error'
-            print 'an error was found'
-	    return content
-      print 'no error'
+      #with open(ERROR, 'r') as f:
+	#line = f.readline()
+        #for line in f:
+          #if '*** CIRCOS ERROR ***' in line:
+            #content = 'error'
+            #print 'an error was found'
+	    #return content
+      #print 'no error'
     
       if os.path.isfile(SVG): 
-       file_ready(SVG)
+       #file_ready(SVG)
        content = open(SVG).read()
-       if 'data' in type:
-	 os.remove(ERROR)
-	 os.remove(TAB)
-         #create circos.zip
-         zip_circos(unique)
-       else:
-         #cleaning task folder
-	 print 'cleaning task folder'
-         files = os.listdir(TASK)
-         for f in files:
-           if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f) and ('parse-table.conf' not in f):
-	     os.remove('%s/%s' % (TASK, f))
-       #save circos into db
-       if current_user.is_authenticated():
-         c = Circos(svg=unique, user_id=current_user.id)
-         db.session.add(c)
-         db.session.commit()
-       #send notification/email to user
-       send_email(unique,type) 
        return content
+      else:
+        content = 'error'
+        return content
 
 ####################################
 ##				  ##
@@ -646,18 +597,38 @@ def gene_info(c, s, e, species):
 ##	      DOWNLOAD	 	  ##
 ##				  ##
 ####################################
+# h = highlights
+# f = file
 @app.route('/download/<unique>/<to_download>', endpoint='download')
 @login_required
 def download(unique, to_download):
   user = authenticate()
   TASK = '%s/%s/%s' % (USER, user, unique)
+  if ".svg" in to_download:
+    name = "%s.svg" % (unique)
+  elif ".zip" in to_download:
+    name = "%s.zip" % (unique)
 
   content = open('%s/%s' % (TASK, to_download)).read()
   response = make_response(content)
   response.headers["content-Type"] = "application/octet-stream" 
-  response.headers["content-Disposition"] = "attachment; filename = %s" % (to_download)
+  response.headers["content-Disposition"] = "attachment; filename = %s" % (name)
   return response
-  
+
+@app.route('/download_highlights/<unique>', methods=['POST'], endpoint='download_highlights')
+@login_required
+def download_highlights(unique):
+  print 'step 1'
+  print unique
+  _data = request.values['data']
+  print 'step 2'
+  #content = _data.read()
+  response = make_response(_data)
+  print 'step 3'
+  response.headers["content-Type"] = "application/octet-stream" 
+  response.headers["content-Disposition"] = "attachment; filename = %s.svg" % (unique) 
+  print "download this svg"
+  return response
 
 ####################################
 ##				  ##
@@ -711,14 +682,17 @@ def delete_all():
 @login_required
 def mycircos():
   user = authenticate()
+  print "mycircos"
   #list of every circos and their type
   c_lst = []
   #get user_id
   if current_user.is_authenticated():
     user_id = current_user.id
+    print user_id
     #get every circos id
     c_all = Circos.query.filter_by(user_id=user_id).all()
     c_ord = list(reversed(c_all))
+    print c_ord
     for c in c_ord:
       #get some info assossiated with the id
       with open('%s/%s/%s/info.txt' % (USER, user, c), 'r') as i:
@@ -737,9 +711,8 @@ def mycircos():
 	    date = l[6:]
 	    tup = tup + (date,)
         c_lst.append(tup)
-	  
     print c_lst
-    return render_template('mycircos.html', title='MyCircos', c_lst=c_lst)
+    return render_template('mycircos.html', title='MyCircos', c_lst=c_lst, user=user)
 
 
 ####################################
