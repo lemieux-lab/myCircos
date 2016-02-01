@@ -14,47 +14,44 @@ celery_app = create_celery(app)
 
 @celery_app.task()
 def circos(path, unique, user, type, id, host):
+  print "accessing Circos-celery"
   TASK = '%s/%s/%s' % (USER, user, unique)
   ERROR = '%s/error.txt' % (TASK)
   #circos
-  cmd_circos = '> process.txt; circos -conf %s -silent > %s/%s/%s/error.txt; rm process.txt' % (path, USER, user, unique) #using dummy method
+  "lauching circos"
+  cmd_circos = '> process.txt; circos -conf %s -silent > %s; rm process.txt' % (path, ERROR) #using dummy method
   o,e = subprocess_cmd(cmd_circos)
   process['%s_circos' % (unique)] = o,e
-  print 'circos launched'
   #add report to logs
   logs(unique, user)
-  if user:
+  if user != "Guest":
     #looking for error
     with open(ERROR, 'r') as e:
-      line = e.readline()
-    #for line in f:
-      #print line
-      if '*** CIRCOS ERROR ***' in line:
+      lines = e.readlines()
+      if (lines) and ('*** CIRCOS ERROR ***' in lines[1]):
         send_email(unique, type, 'failure', user, host)
-        print 'email sent'
+	files = os.listdir(TASK)
+	for f in files:
+	  os.remove('%s/%s' % (TASK, f))
       else:
         #zip + clean
-        print 'no error and zipping files'
         if 'data' in type:
-          os.remove(ERROR)
-  	  #create circos.zip
+        #os.remove(ERROR)
+  	#create circos.zip
 	  zip_circos(unique, user)
         else:
 	  #cleaning task folder
-	  print 'cleaning task folder'
 	  files = os.listdir(TASK)
 	  for f in files:
 	    if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f) and ('parse-table.conf' not in f):
 	      os.remove('%s/%s' % (TASK, f))
-	  #save circos into db
-        if user != "Guest":
-	  c = Circos(svg=unique, user_id=id)
-	  db.session.add(c)
-       	  db.session.commit()
-	  #send notification/email to user
-	  send_email(unique, type, 'success', user, host)
-          print 'email sent'
-  print 'PROCESS DONE' 
+    	#save circos into db
+   	c = Circos(svg=unique, user_id=id)
+    	db.session.add(c)
+    	db.session.commit()
+    	#send notification/email to user
+    	send_email(unique, type, 'success', user, host)
+    print "PROCESS DONE"
 
 @celery_app.task()
 def tabular_circos(to_parse, parse_table, TASK, unique, user, id, host):

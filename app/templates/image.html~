@@ -64,7 +64,6 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 			<a class="btn btn-default btn-sm pull-right disabled" href="/download/{{ unique }}/circos.zip" title="Download ZIP"><span class="glyphicon glyphicon-duplicate"></span></a>
 		{% endif %}
 		<button class="btn btn-default btn-sm pull-right" id="save_as_svg" value="" title="Download SVG"><span class="glyphicon glyphicon-floppy-save"></span></button>
-		<div class='svg' id='image_svg' display="block" margin="auto"></div>
 	</div>
 	<div class="col-md-4">
 		<!-- Zoom -->
@@ -74,8 +73,13 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<input type="range" id="zoom-range" min="50" max="250" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
 			</div>		
 		</div>
-		<br>
-
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-8">
+		<div class='svg' id='image_svg' display="block" margin="auto"></div>
+	</div>
+	<div class="col-md-4">
 		{% if 'Tabular' not in type %}
 		<!-- Enable Highlights -->
 		<div class="row" >
@@ -147,7 +151,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 		<div class="row" id ="show_l" style="display:none">
 			<div class="row">
 				<div class="col-md-10">
-					<center><button class="astext" onclick="show_panel('legend')">Show Legend</center>
+					<center><button class="astext btn btn-default btn-sm" onclick="show_panel('legend')">Show Legend</center>
 				</div>
 			</div>			
 		<br>
@@ -156,7 +160,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 		<div class="row" id ="show_d" style="display:none">
 			<div class="row">
 				<div class="col-md-10">
-					<center><button class="astext" onclick="show_panel('details')">Show Details</center>
+					<center><button class="astext btn btn-default btn-sm" onclick="show_panel('details')">Show Details</center>
 				</div>
 			</div>
 		</div>
@@ -202,7 +206,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 
 <!-- Hidden <FORM> to submit the SVG data to the server, which will convert it to SVG/PDF/PNG downloadable file.
      The form is populated and submitted by the JavaScript below. -->
-<form id="svgform" method="post" action="/download_highlights">
+<form id="svgform" method="post" action="/download_highlights/{{ unique }}">
 	<input type="hidden" id="output_format" name="output_format" value=""></input>
 	<input type="hidden" id="data" name="data" value=""></input>
 </form>
@@ -332,7 +336,7 @@ function getImage () {
  	   		console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
-				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div><p><center>Do not close this current tab while your Circos is beeing generated. You will receive an e-mail once the task is done.</center></p></div>');
+				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
 				{% endblock%} 	   		
 			}
 
@@ -364,13 +368,16 @@ $(document).ready(function() {
 	$("[name='switch']").bootstrapSwitch();	
 });
 
+$('.tooltip').tooltip('hide'),
 $("#image_svg").panzoom({
- 	//$zoomIn: $("#zoom-in"),
-  	//$zoomOut: $("#zoom-out"),
+	//$zoomIn: $("#zoom-in"),
+	//$zoomOut: $("#zoom-out"),
 });
+
 
 function zoom(val){
 	console.debug(val)
+	//$('.tooltip').tooltip('hide');
 	var svg = $('#image_svg').find('svg')[0];
 	var v = val + "%"
 	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
@@ -398,11 +405,14 @@ function h(){
 				var x = this.getAttribute("x");
 				if (emphasized[x]) {
 					$(this).attr('id', 'e');	// emphasized already
+					console.debug("mouseenter: already emphasized")
 				} else {
 					var style = this.getAttribute("style");
 					emphasized[x] = style;
 					$(this).css('fill', 'crimson');
 					$(this).css('font-size', '60');
+					console.debug("mouseenter: not already emphasized")
+					
 				}
 			
 			},
@@ -410,15 +420,29 @@ function h(){
 				var x = this.getAttribute("x")
 				$(this).attr("style", emphasized[x]);
 				delete emphasized[x];
+				console.debug("mouseleave")
 			},
 			click: function() {
 				if (this.getAttribute("id") == "e") {		// back un-emphasized
+					console.debug(emphasized)
 					var x = this.getAttribute("x");
 						$(this).attr("style", emphasized[x]);
 					$(this).removeAttr('id');
-					delete emphasized[x];	
+					console.debug(x)
+					delete emphasized[x];
+					$(this).bind({
+						mouseleave: function() { 
+							var x = this.getAttribute("x")
+							$(this).attr("style", emphasized[x]);
+							delete emphasized[x];
+							console.debug("mouseleave")
+						},
+					});
+					console.debug(emphasized)
+					console.debug("click: un-emphasized")	
 				} else {
-					$(this).off('mouseleave');		// keep emphasized
+					$(this).unbind('mouseleave');		// keep emphasized
+					console.debug("click: already emphasized")
 				
 				}			
 			},
@@ -464,7 +488,14 @@ function h(){
 					var d = this.getAttribute("d");
 					$(this).attr("style", emphasized[d]);
 					$(this).removeAttr('id');
-					delete emphasized[d];	
+					delete emphasized[d];
+					$(this).bind({					
+						mouseleave: function() {
+							var d = this.getAttribute("d")
+							$(this).attr("style", emphasized[d]);
+							delete emphasized[d];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized					
 				}
@@ -495,7 +526,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({					
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -527,7 +565,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -559,7 +604,14 @@ function h(){
 					var cx = this.getAttribute("cx");
 					$(this).attr("style", emphasized[cx]);
 					$(this).removeAttr('id');
-					delete emphasized[cx];	
+					delete emphasized[cx];
+					$(this).bind({
+						mouseleave: function() {
+							var cx = this.getAttribute("cx")
+							$(this).attr("style", emphasized[cx]);
+							delete emphasized[cx];
+						},	
+					});
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -573,16 +625,19 @@ function h(){
 				//emphasized					
 				if (emphasized[x]) {
 					$(this).attr('id', 'e');	// emphasized already
+					console.debug("mouseenter: already emphasized")
 				} else {
 					var style = this.getAttribute("style");
 					emphasized[x] = style;
 					$(this).css('fill', 'crimson');
+					console.debug("mouseenter: not already emphasized")
 				}
 				},
 			mouseleave: function() { 
 				var x = this.getAttribute("x")
 				$(this).attr("style", emphasized[x]);
 				delete emphasized[x];
+				console.debug("mouseleave")
 			},
 			click: function() {
 				if (this.getAttribute("id") == "e") {		// back un-emphasized
@@ -590,8 +645,17 @@ function h(){
 					$(this).attr("style", emphasized[x]);
 					$(this).removeAttr('id');
 					delete emphasized[x];
+					$(this).bind({
+						mouseleave: function() { 
+							var x = this.getAttribute("x")
+							$(this).attr("style", emphasized[x]);
+							delete emphasized[x];
+						},
+					});
+					console.debug("click: um-emphasized")
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
+					console.debug("click: emphasized")
 				}			
 			},
 		});
@@ -618,7 +682,14 @@ function h(){
 					var d = this.getAttribute("d");
 					$(this).attr("style", emphasized[d]);
 					$(this).removeAttr('id');
-					delete emphasized[d];	
+					delete emphasized[d];
+					$(this).bind({
+						mouseleave: function() {
+							var d = this.getAttribute("d")
+							$(this).attr("style", emphasized[d]);
+							delete emphasized[d];
+						},
+					});	
 				} else {
 					$(this).off('mouseleave');		// keep emphasized
 				
@@ -654,6 +725,9 @@ function v(){
 				var e = t.getAttribute("data-end");
 				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -693,14 +767,19 @@ function v(){
 		// labels
 		$("g[id^='plot'] text").each(function(i,v) {
 			id = $(this).parent()[0].id;
+			console.debug('DONE')
 			if (id.search('axis')==-1){
 				var t = this
 				var val = (t.getAttribute("data-value")).replace(/'/g,"");
 				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
 				var s = t.getAttribute("data-start");
 				var e = t.getAttribute("data-end");
-				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', trigger: 'hover', placement: "auto left", html:'true'});
+				//$(this).attr('title', "<b>" + val + "</b><br>" + chr + ": " + s + "-" + e)
+				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: "body", trigger: 'hover', placement: "auto left", html:'false'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -748,6 +827,9 @@ function v(){
 				var e = t.getAttribute("data-end");
 				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -794,6 +876,9 @@ function v(){
 				var e = this.getAttribute("data-end");
 				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -840,6 +925,9 @@ function v(){
 				var e = this.getAttribute("data-end");
 				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
 				$(this).bind("click", function(){
+					$(this).bind("mouseleave", function(){
+						$(this).tooltip("hide")
+					});
 					document.getElementById("gene_info").style.display = "block";
 					
 					$.ajax({
@@ -885,6 +973,11 @@ function v(){
 			var s2 = this.getAttribute("data-start2");
 			var e2 = this.getAttribute("data-end2");
 			$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
+			$(this).bind("click", function(){
+				$(this).bind("mouseleave", function(){
+					$(this).tooltip("hide")
+				});
+			});
 		});
 	} else {
 		$("g[id^='plot'] path").each(function(i,v) {

@@ -35,16 +35,19 @@ def logs(unique, user):
   #user = authenticate()
   with open("%s/%s/%s/error.txt" % (USER, user, unique), 'r') as f:
       with open("logs.txt", "a") as f1:
+	#print "LOGS *******************"
         f1.write('%s\t\t' % (datetime.date.today()))
+	#print '%s\t\t' % (datetime.date.today())
         f1.write('%s\t' % (unique))
+	#print '%s\t' % (unique)
         for line in f:
-            f1.write('%s .*. ' % (line)) 
+            f1.write('%s .*. ' % (line))
+	    #print '%s .*. ' % (line)
         f1.write('\n')
-  print 'report added to logs.txt'
 
 #sending notification to the user
 def send_email(unique, type, state, user, host):
-  print 'sending email'
+  print 'sending email: %s' % (state)
   no_reply = 'circos@binfo09.iric.ca'
   #user = authenticate()
   #with app.test_request_context():
@@ -58,10 +61,11 @@ def send_email(unique, type, state, user, host):
   msg['To'] = user
 
   if state == 'success':
-  	message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s/%s' % (host, type, unique)
-  elif state == 'error':
-  	message = 'An error occured while generating your Circos. Please check your file(s) and try again: %s' % (host)
+    message = 'Your Circos has been generated.\n\nYou can view it by clicking on the link: %scircos_display/%s/%s' % (host, type, unique)
+  elif state == 'failure':
+    message = 'An error occured while generating your Circos. Please check your file(s) and try again: %s' % (host)
 
+  print message
   msg.attach(MIMEText(message, 'plain'))
 
   try:

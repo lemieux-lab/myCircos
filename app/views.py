@@ -17,7 +17,7 @@ from task import *
 from upload import *
 from svg import *
 from circos import *
-from celery_tasks import circos, test, add, test_return
+from celery_tasks import *
 from display import *
 from post_circos import *
 from .models import User, Circos
@@ -269,6 +269,8 @@ def index_data():
     #generating the configuration files and the image
     generate(unique=unique, plots=plots, links=links, values=values)
     c_r = circos.delay('%s/circos.conf' % (TASK), unique, user, 'data', current_user.id, request.host_url)
+    print c_r
+    print "just called circos process"
     tasks[unique] = c_r
     return redirect(url_for('circos_display', type='data', unique=unique))
   return redirect(url_for('error', template='index_data', error='An error occured while loading your file(s). Please try again'))
