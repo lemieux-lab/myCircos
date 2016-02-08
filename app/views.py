@@ -50,6 +50,14 @@ def unauthorized(e):
 def not_found(e):
   return render_template('404.html'), 404
 
+@app.errorhandler(502)
+def proxy(e):
+  return render_template('502.html'), 502
+
+@app.errorhandler(503)
+def unavailable(e):
+  return render_template('503.html'), 503
+
 
 ####################################################
 ####						####

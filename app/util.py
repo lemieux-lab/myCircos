@@ -9,11 +9,14 @@ import os, os.path
 import subprocess, shutil
 from subprocess import Popen, PIPE
 from flask.ext.login import current_user
+from views import *
+from post_circos import *
 
 #to execute command at the command line level
 def subprocess_cmd(cmd):
   #p = subprocess.Popen(cmd, shell=True, stdout = None, stderr=subprocess.STDOUT)
   o,e = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
+  print "running subprocess"
   return o,e
 
 #user 

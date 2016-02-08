@@ -65,6 +65,7 @@ def send_email(unique, type, state, user, host):
   elif state == 'failure':
     message = 'An error occured while generating your Circos. Please check your file(s) and try again: %s' % (host)
 
+  print "****************"
   print message
   msg.attach(MIMEText(message, 'plain'))
 

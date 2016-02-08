@@ -18,16 +18,18 @@ def circos(path, unique, user, type, id, host):
   TASK = '%s/%s/%s' % (USER, user, unique)
   ERROR = '%s/error.txt' % (TASK)
   #circos
-  "lauching circos"
   cmd_circos = '> process.txt; circos -conf %s -silent > %s; rm process.txt' % (path, ERROR) #using dummy method
   o,e = subprocess_cmd(cmd_circos)
   process['%s_circos' % (unique)] = o,e
+  print o
+  print e
   #add report to logs
   logs(unique, user)
   if user != "Guest":
     #looking for error
     with open(ERROR, 'r') as e:
       lines = e.readlines()
+      print lines
       if (lines) and ('*** CIRCOS ERROR ***' in lines[1]):
         send_email(unique, type, 'failure', user, host)
 	files = os.listdir(TASK)
