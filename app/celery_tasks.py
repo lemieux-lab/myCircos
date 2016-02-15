@@ -1,3 +1,4 @@
+import os
 from app import app, db, lm, models
 from create import create_celery
 from util import *
@@ -25,35 +26,33 @@ def circos(path, unique, user, type, id, host):
   print e
   #add report to logs
   logs(unique, user)
-  if user != "Guest":
-    #looking for error
-    with open(ERROR, 'r') as e:
-      lines = e.readlines()
-      print lines
-      if (lines) and ('*** CIRCOS ERROR ***' in lines[1]):
+  if os.stat(ERROR).st_size == 0:
+    if user != "Guest":
+      #looking for error
+      if os.stat(ERROR).st_size != 0:
         send_email(unique, type, 'failure', user, host)
-	files = os.listdir(TASK)
-	for f in files:
+        files = os.listdir(TASK)
+        for f in files:
 	  os.remove('%s/%s' % (TASK, f))
       else:
         #zip + clean
         if 'data' in type:
         #os.remove(ERROR)
-  	#create circos.zip
+        #create circos.zip
 	  zip_circos(unique, user)
         else:
-	  #cleaning task folder
+          #cleaning task folder
 	  files = os.listdir(TASK)
 	  for f in files:
 	    if ('.svg' not in f) and ('.png' not in f) and ('info.txt' not in f) and ('parse-table.conf' not in f):
 	      os.remove('%s/%s' % (TASK, f))
-    	#save circos into db
-   	c = Circos(svg=unique, user_id=id)
-    	db.session.add(c)
-    	db.session.commit()
-    	#send notification/email to user
-    	send_email(unique, type, 'success', user, host)
-    print "PROCESS DONE"
+        #save circos into db
+        c = Circos(svg=unique, user_id=id)
+        db.session.add(c)
+        db.session.commit()
+        #send notification/email to user
+        send_email(unique, type, 'success', user, host)
+  print "PROCESS DONE"
 
 @celery_app.task()
 def tabular_circos(to_parse, parse_table, TASK, unique, user, id, host):
@@ -65,17 +64,23 @@ def tabular_circos(to_parse, parse_table, TASK, unique, user, id, host):
   print "PARSING FILES"
   cmd_table = '(cat %s | parse-table -conf %s > %s/parsed.txt) &>> %s' % (to_parse, parse_table, TASK, ERROR)
   subprocess_cmd(cmd_table)
-  #make-conf
-  print "MAKE FILES"
-  cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s' % (TASK, TASK)
-  subprocess_cmd(cmd_conf)
-  #circos
-  print "CALLING CIRCOS"
-  if user == 'Guest':
-    specific_g(unique, user)
+  if os.stat(ERROR).st_size == 0:
+    #make-conf
+    print "MAKE FILES"
+    cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s' % (TASK, TASK)
+    subprocess_cmd(cmd_conf)
+    if os.stat(ERROR).st_size == 0:
+      #circos
+      print "CALLING CIRCOS"
+      specific_g(unique, user)
+      if os.stat(ERROR).st_size == 0:
+        circos(CIR_CONF, unique, user, 'tab', id, host)
+      else:
+	logs(unique, user)
+    else:
+      logs(unique, user)
   else:
-    specific(unique)
-  circos(CIR_CONF, unique, user, 'tab', id, host)
+    logs(unique, user)
 
 @celery_app.task()
 def test(word): 
