@@ -80,8 +80,26 @@ def generate(unique, plots, links, values):
 ########## FROM CONFIG + TABULAR ##########
 #specificy location and name of svg file
 def specific(unique):
+  print "**********************************"
   print 'starting specific'
   user = authenticate()
+  print user
+  with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'r+b' ) as f:
+    #look if already specify
+    parameters = f.readlines()
+    for p in parameters:
+      if ('file' in p) or ('dir' in p):
+        parameters.remove(p)
+    #name of the generated svg image
+    f.write('\nfile** = circos_%s.png\n' % (unique))
+    #location of the generated svg image
+    f.write('dir** = %s/%s/%s\n' % (USER, user, unique))
+  print 'specific finished'
+
+def specific_g(unique, user):
+  print "**********************************"
+  print 'starting specific'
+  print user
   with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'r+b' ) as f:
     #look if already specify
     parameters = f.readlines()

@@ -57,17 +57,24 @@ def circos(path, unique, user, type, id, host):
 
 @celery_app.task()
 def tabular_circos(to_parse, parse_table, TASK, unique, user, id, host):
+  print "CELERY TASK"
   TASK = '%s/%s/%s' % (USER, user, unique)
   ERROR = '%s/error.txt' % (TASK)
   CIR_CONF = '%s/circos.conf' % (TASK)
   #parse
-  cmd_table = 'cat %s | parse-table -conf %s > %s/parsed.txt' % (to_parse, parse_table, TASK)
+  print "PARSING FILES"
+  cmd_table = '(cat %s | parse-table -conf %s > %s/parsed.txt) &>> %s' % (to_parse, parse_table, TASK, ERROR)
   subprocess_cmd(cmd_table)
   #make-conf
-  cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s' % (TASK, TASK, TASK)
+  print "MAKE FILES"
+  cmd_conf = 'cat %s/parsed.txt | make-conf -dir %s' % (TASK, TASK)
   subprocess_cmd(cmd_conf)
   #circos
-  specific(unique)
+  print "CALLING CIRCOS"
+  if user == 'Guest':
+    specific_g(unique, user)
+  else:
+    specific(unique)
   circos(CIR_CONF, unique, user, 'tab', id, host)
 
 @celery_app.task()
