@@ -449,7 +449,7 @@ def index_tabular():
 	uploaded = upload.readlines()
       with open(to_parse, 'a') as parse:
         n = uploaded[0].count('\t') + 1
-	u = upload[0]
+	u = uploaded[0]
 	print u        
 	print n
         parse.write("segment_order\t")
