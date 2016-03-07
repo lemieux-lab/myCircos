@@ -48,7 +48,7 @@ def logs(unique, user):
 #sending notification to the user
 def send_email(unique, type, state, user, host):
   print 'sending email: %s' % (state)
-  no_reply = 'circos@binfo09.iric.ca'
+  no_reply = 'mycircos@iric.ca'
   #user = authenticate()
   #with app.test_request_context():
   	#host = request.host_url
@@ -70,7 +70,7 @@ def send_email(unique, type, state, user, host):
   msg.attach(MIMEText(message, 'plain'))
 
   try:
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP('binsrv1.iric.ca')
     s.sendmail(no_reply, [user], msg.as_string())
     s.quit()
     print 'Email successfully sent'
