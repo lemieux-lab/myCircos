@@ -55,7 +55,7 @@
 							<li><a class="navbar-brand" href="#" role="button" data-toggle="modal" data-target="#help_info"><span class="glyphicon glyphicon-question-sign"></span> Help </a><li>
 							<li class="dropdown">
 						    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
-									{% if current_user.is_authenticated() %}
+									{% if current_user.is_authenticated %}
 										{{ current_user.email }} 
 									{% else %}
 										User  
@@ -116,7 +116,7 @@
 			{% endblock %}
 			<br><br>	
 		</div>
-		<div class="panel-footer" style="width: 100%; background-position: 0% 0%; position: fixed; bottom: 5pt;left: 0pt;">
+		<div class="panel-footer" style="width: 100%; background-position: 0% 0%; position: fixed; bottom: 0pt; left: 0pt;">
       			<p class="text-muted">© 2015 Institute for Research in Immunology and Cancer | All Rights Reserved.</p>
     		</div>
 	</body>
