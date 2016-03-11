@@ -42,9 +42,6 @@ def logged():
   username = User.query.filter_by(email=email).first()
   if username:
     hash = username.password
-    print username 
-    print hash
-    print md5_crypt.verify(password, hash)
     if md5_crypt.verify(password, hash):
       registered_user = User.query.filter_by(email=email, password=hash).first()
     else:
