@@ -11,8 +11,9 @@ print "looking if circos is running properly"
 cmd = 'circos'
 o,e = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
-error_string = 'ommand not found'
-if error_string in o or error_string in e:  
+error_string_en = 'ommand not found'
+error_string_fr = 'ommande introuvable'
+if error_string_en in o or error_string_en in e or error_string_fr in o or error_string_fr in e:  
   print 'Command not found', 
   print str(o)
   print str(e)

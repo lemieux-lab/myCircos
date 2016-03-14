@@ -10,7 +10,7 @@ from werkzeug import secure_filename
 import tarfile, zipfile
 from util import *
 
-ALLOWED_EXTENSIONS = set(['txt', 'tar', 'zip', 'gz'])
+ALLOWED_EXTENSIONS = set(['txt', 'tar', 'zip', 'gz', 'tgz'])
 USER = 'app/circos/usr'
 
 #check if extension is valid
