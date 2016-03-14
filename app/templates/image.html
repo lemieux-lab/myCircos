@@ -237,10 +237,13 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 
 
 {% block script %}
-<script src="{{url_for('static', filename='jquery.panzoom.js')}}"/>
-<script src="{{url_for('static', filename='tooltip.js')}}"/>
-<script src="{{url_for('static', filename='bootstrap-switch.js')}}"/>
-<script>
+
+<script src="{{url_for('static', filename='js/jquery.panzoom.js')}}" type='text/javascript'></script>
+<script src="{{url_for('static', filename='js/tooltip.js')}}" type='text/javascript'></script>
+<script src="{{url_for('static', filename='js/bootstrap-switch.js')}}" type='text/javascript'></script>
+<script type='text/javascript'> 
+
+
 /*******************************************
 ****					****
 ****	    	INFO - LEGEND		****
@@ -300,6 +303,7 @@ function submit_download_form(output_format){
 ****					****
 ********************************************/
 var timesRun = 0;
+console.debug('here');
 
 getImage();
 
@@ -329,6 +333,7 @@ var species = document.getElementById("species").value
 var server = "http://rest.ensembl.org"
 
 function getImage () {
+
 	console.debug("getImage");
 	$.ajax({ 
  	   url : {% block url%}"{{url_for('get_svg', unique=unique, type=type)}}"{% endblock %},   
@@ -358,7 +363,9 @@ function getImage () {
 				svg.setAttribute('viewBox', "-300 -300 3500 3500");
 				clearInterval(refresh);							
 			}
-        }
+        },
+       error : function(e) { console.debug(e);}
+
       });
 }
 

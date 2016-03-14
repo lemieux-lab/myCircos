@@ -1,12 +1,14 @@
 from __future__ import division
-import os, os.path
-from flask import render_template, redirect, url_for, request, send_from_directory, send_file, jsonify, make_response, session, g
+import os, re
 import requests, sys, json
-import re
+import datetime, time, random, subprocess, collections, shutil, tarfile, zipfile
+
+from flask import render_template, redirect, url_for, request, send_from_directory, send_file, jsonify, make_response, session, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
+
 from werkzeug import secure_filename
 from app import app, db, lm, models
-import datetime, time, random, subprocess, collections, shutil, tarfile, zipfile
+
 from random import randint
 from subprocess import Popen, PIPE
 from celery import signature
@@ -514,6 +516,7 @@ def get_svg(unique, type):
   CIR_CONF = '%s/circos.conf' % (TASK)
   content = '' 
 
+  print 'get_svg'
   #previous circos
   if os.path.isfile(SVG) and not Circos.query.filter_by(svg=unique).first() is None:
     print 'getting previous circos'
