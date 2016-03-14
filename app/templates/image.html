@@ -237,11 +237,10 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 
 
 {% block script %}
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script type="text/javascript"  src="{{url_for('static', filename='jquery.panzoom.js')}}"></script>
-<script type="text/javascript"  src="{{url_for('static', filename='tooltip.js')}}"></script>
-<script type="text/javascript"  src="{{url_for('static', filename='bootstrap-switch.js')}}"></script>
-<script type="text/javascript" >
+<script src="{{url_for('static', filename='jquery.panzoom.js')}}"/>
+<script src="{{url_for('static', filename='tooltip.js')}}"/>
+<script src="{{url_for('static', filename='bootstrap-switch.js')}}"/>
+<script>
 /*******************************************
 ****					****
 ****	    	INFO - LEGEND		****
