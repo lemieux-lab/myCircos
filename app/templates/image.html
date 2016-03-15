@@ -3,7 +3,13 @@
 {% block style %}
 .tooltip-inner {
   background-color: #0088cc
+
+.panzoom {
+     -webkit-backface-visibility: initial !important;
+     -webkit-transform-origin: 50% 50%;
+ }
 }
+
 {% endblock %}
 
 {% block help %}
@@ -73,8 +79,9 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 		<!-- Zoom -->
 		<div class="row">
 			<div class="col-md-10">
-				<label for="zoom-"><font color="#0088cc">Zoom <span id="perc" >100%</span></font></label> 
-				<input type="range" id="zoom-range" min="50" max="250" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
+				<label for="zoom-range"><font color="#0088cc">Zoom <span id="perc" >100%</span></font></label> 
+				<!-- <input type="range" id="zoom-range" min="0.5" max="2.5" value="1" step="0.1"></input> -->
+		 	    <input type="range" id="zoom-range" min="50" max="450" value="100" step="1" onchange="zoom(this.value)" oninput="zoom(this.value)"></input>
 			</div>		
 		</div>
 	</div>
@@ -237,12 +244,10 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 
 
 {% block script %}
-
 <script src="{{url_for('static', filename='js/jquery.panzoom.js')}}" type='text/javascript'></script>
 <script src="{{url_for('static', filename='js/tooltip.js')}}" type='text/javascript'></script>
 <script src="{{url_for('static', filename='js/bootstrap-switch.js')}}" type='text/javascript'></script>
 <script type='text/javascript'> 
-
 
 /*******************************************
 ****					****
@@ -303,7 +308,6 @@ function submit_download_form(output_format){
 ****					****
 ********************************************/
 var timesRun = 0;
-console.debug('here');
 
 getImage();
 
@@ -329,19 +333,18 @@ function ajax(c, s, e, species, callback){
 	});
 }
 
-var species = document.getElementById("species").value
-var server = "http://rest.ensembl.org"
+var species = document.getElementById("species").value;
+var server = "http://rest.ensembl.org";
 
 function getImage () {
-
-	console.debug("getImage");
+	//console.debug('getImage');
 	$.ajax({ 
  	   url : {% block url%}"{{url_for('get_svg', unique=unique, type=type)}}"{% endblock %},   
  	   cache : false,
  	   datatype : 'xml',
 
  	   success : function(content) {
- 	   		console.debug(++timesRun);		
+ 	   		//console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
 				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
@@ -357,7 +360,7 @@ function getImage () {
  	   		else {  
 				
 				$("#image_svg").html(content);
-                        	var svg = $('#image_svg').find('svg')[0];
+                var svg = $('#image_svg').find('svg')[0];
 				svg.setAttribute('width', "100%");
 				svg.setAttribute('height', "100%");
 				svg.setAttribute('viewBox', "-300 -300 3500 3500");
@@ -378,336 +381,164 @@ $(document).ready(function() {
 	$("[name='switch']").bootstrapSwitch();	
 });
 
-$('.tooltip').tooltip('hide'),
-$("#image_svg").panzoom({
-	//$zoomIn: $("#zoom-in"),
-	//$zoomOut: $("#zoom-out"),
+
+//$('.tooltip').tooltip('hide');
+
+var panzoom =  $("#image_svg").panzoom({transition:false});//,
+/*						$zoomRange: $('#zoom-range'),
+						increment : 0.1,						
+						minsScale : 0.5,
+						maxScale : 5,
+						rangeStep :0.1});
+
+$(panzoom).on('panzoomzoom', function(e, panzoom, scale, opt) {
+    $("#perc").html((scale*100).toFixed(0) +"%");
+
+});
+*/
+// zoom with wheel mouse  // jquery.panzoom.js example
+
+// Not using the zoom of panzoom 
+$(panzoom).parent().on('mousewheel', function( e ) {
+            e.preventDefault();
+            val = parseInt($("#zoom-range").val());
+            increment = parseInt($("#zoom-range").attr('step'))*5;
+            var delta = e.delta || e.originalEvent.wheelDelta;
+            var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+            var zoomValue = zoomOut ? val - increment : val + increment
+            zoom(zoomValue);
+            $("#zoom-range").val(zoomValue);
+            $("#perc").text(zoomValue+'%');
 });
 
-
-function zoom(val){
-	console.debug(val)
-	//$('.tooltip').tooltip('hide');
-	var svg = $('#image_svg').find('svg')[0];
-	var v = val + "%"
-	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
-	document.getElementById("perc").innerHTML = v;
-	svg.setAttribute('width', v);
-	svg.setAttribute('height', v);
-	svg.setAttribute('viewBox', vb.join(" "))
-};
+// Not using the zoom of panzoom 
+ function zoom(val){
+ 	//$('.tooltip').tooltip('hide');
+ 	var svg = $('#image_svg').find('svg')[0];
+ 	var v = val + "%"
+ 	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
+ 	var n =  val < 100 ? -1 : 1 ; 
+ 	$("perc").text(v);
+ 	svg.setAttribute('width', v);
+ 	svg.setAttribute('height', v);
+ 	svg.setAttribute('viewBox', vb.join(" "));
+ 	
+ 	// Need to find the right formula... Would like to keep the image centered after zoom
+ 	//var m  = 'matrix(1,0,0,1,'+ n*vb[0]+','+vb[1]+')'
+	//$("#image_svg").css('webkit-transform', m);
+ 	//$("#image_svg").css('transform', m);
+ 	
+ };
 
 function reset() {
 	document.location.reload(true);
-	console.debug('refreshed');
 };
 
-var emphasized = {}
 //highlight -> ON/OFF
+var emphasized = {}
+
+var emphasize_me = function (el, val, opts) {
+	if (emphasized[val]) {
+		$(el).attr('id', 'e');	// emphasized already
+	} else {
+		var style = el.getAttribute("style");
+		emphasized[val] = style;	
+		console.debug($(el));
+		$(el).css(opts);
+	}
+};
+
+var emphasize_ml = function(el, val) { 
+	$(el).attr("style", emphasized[val]);
+	delete emphasized[val];
+};
+
+var emphasize_click = function(el, val) {
+	
+	if (el.getAttribute("id") == "e") {		// back un-emphasized
+		$(el).removeAttr('id');
+		$(el).bind({ mouseleave: function() {emphasize_ml(el, val)}});
+	} else {
+		$(el).unbind('mouseleave');		// keep emphasized
+	}			
+};
+
+
 function h(){
-	console.debug(document.getElementById('highlights').checked)
+
 	if(document.getElementById('highlights').checked){
-		//var emphasized = {}
-		console.debug("highlight: ON")
-		//ideogram labels
-		$("#ideograms text").bind({
+		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").bind({
 			mouseenter: function() {
+				var opts = {'fill':'crimson'};
 				var x = this.getAttribute("x");
-				if (emphasized[x]) {
-					$(this).attr('id', 'e');	// emphasized already
-					console.debug("mouseenter: already emphasized")
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[x] = style;
-					$(this).css('fill', 'crimson');
-					$(this).css('font-size', '60');
-					console.debug("mouseenter: not already emphasized")
-					
-				}
-			
+				emphasize_me(this, x, opts);
 			},
-			mouseleave: function() { 
-				var x = this.getAttribute("x")
-				$(this).attr("style", emphasized[x]);
-				delete emphasized[x];
-				console.debug("mouseleave")
+			mouseleave: function() {
+				var x = this.getAttribute("x");
+				emphasize_ml(this, x);
 			},
-			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					console.debug(emphasized)
-					var x = this.getAttribute("x");
-						$(this).attr("style", emphasized[x]);
-					$(this).removeAttr('id');
-					console.debug(x)
-					delete emphasized[x];
-					$(this).bind({
-						mouseleave: function() { 
-							var x = this.getAttribute("x")
-							$(this).attr("style", emphasized[x]);
-							delete emphasized[x];
-							console.debug("mouseleave")
-						},
-					});
-					console.debug(emphasized)
-					console.debug("click: un-emphasized")	
-				} else {
-					$(this).unbind('mouseleave');		// keep emphasized
-					console.debug("click: already emphasized")
-				
-				}			
+			click: function(){
+				var x = this.getAttribute("x");
+				emphasize_click(this, x);
 			},
 		});
 		//plot-axis
-		$("g[id^='plot'][id$='-axis'] path").bind({
+		$("g[id^='plot'][id$='-axis'] path, #track_0 path").bind({
 			mouseenter: function() {
-				var d = this.getAttribute("d");	
-				var style = this.getAttribute("style");
-				emphasized[d] = style;
-				$(this).attr("style", emphasized[d]);
+				d = this.getAttribute("d");	
+				opts = {'stroke':'crimson', 'stroke-width':'2px'};
+				if (this.parentNode.id == "track_0") {
+					opts = {'stroke' : 'crimson', 'stroke-width' : '7.0'};
+				}
+				emphasize_me(this, d, opts);
 			},
 			mouseleave: function() {
 				var d = this.getAttribute("d");
-				$(this).attr("style", emphasized[d]);
-				delete emphasized[d];
+				emphasize_ml(this, d);
+			},
+			click: function(){
+				d = this.getAttribute("d");
+				emphasize_click(this, d);
 			},
 		});
 		//plots
 		$("g:not([id$='-axis'])[id^='plot'] path").bind({
 			mouseenter: function() {
 				var d = this.getAttribute("d");
-				//emphasize					
-				if (emphasized[d]) {
-					$(this).attr('id', 'e');	// emphasized already
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[d] = style;
-					$(this).css('fill', 'crimson');
-					if (this.getAttribute("class") == "tile") {
-						$(this).css('stroke', 'crimson');
-						$(this).css('stroke-width', '5.0');
-					}
-				}		
+				opts = {'fill' : 'crimson'};
+				if (this.getAttribute("class") == "tile") {
+					opts = {'fill' : 'crimson', 'stroke' : 'crimson', 'stroke-width' : '3.0'};
+				}
+				emphasize_me(this, d, opts);
 			},
 			mouseleave: function() {
-				var d = this.getAttribute("d")
-				$(this).attr("style", emphasized[d]);
-				delete emphasized[d];
+				var d = this.getAttribute("d");
+				emphasize_ml(this, d);
 			},
 			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var d = this.getAttribute("d");
-					$(this).attr("style", emphasized[d]);
-					$(this).removeAttr('id');
-					delete emphasized[d];
-					$(this).bind({					
-						mouseleave: function() {
-							var d = this.getAttribute("d")
-							$(this).attr("style", emphasized[d]);
-							delete emphasized[d];
-						},
-					});	
-				} else {
-					$(this).off('mouseleave');		// keep emphasized					
-				}
+				var d = this.getAttribute("d");
+				emphasize_click(this, d);
 			}
 		});
 		//scatter plots -> polygons
-		$("g:not([id$='-axis'])[id^='plot'] polygon").bind({
+		$("g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").bind({
 			mouseenter: function() {
 				var cx = this.getAttribute("cx");
-				//emphasized
-				if (emphasized[cx]) {
-					$(this).attr('id', 'e');	// emphasized already
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[cx] = style;
-					$(this).css('fill', 'crimson')		
-					$(this).css('stroke', 'fireBrick');
-					$(this).css('stroke-width', '3.0');
-				}	
+				opts = {'fill':'crimson', 'stroke':'fireBrick','stroke-width':'3.0'};
+				emphasize_me(this, cx, opts);
 			},
 			mouseleave: function() {
-				var cx = this.getAttribute("cx")
-				$(this).attr("style", emphasized[cx]);
-				delete emphasized[cx];
-			},
-			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var cx = this.getAttribute("cx");
-					$(this).attr("style", emphasized[cx]);
-					$(this).removeAttr('id');
-					delete emphasized[cx];
-					$(this).bind({					
-						mouseleave: function() {
-							var cx = this.getAttribute("cx")
-							$(this).attr("style", emphasized[cx]);
-							delete emphasized[cx];
-						},
-					});	
-				} else {
-					$(this).off('mouseleave');		// keep emphasized
-				
-				}
-			}
-		});
-		//scatter plots -> rectangle
-		$("g:not([id$='-axis'])[id^='plot'] rectangle").bind({
-			mouseenter: function() {
 				var cx = this.getAttribute("cx");
-				//emphasized
-				if (emphasized[cx]) {
-					$(this).attr('id', 'e');	// emphasized already
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[cx] = style;
-					$(this).css('fill', 'crimson')		
-					$(this).css('stroke', 'fireBrick');
-					$(this).css('stroke-width', '3.0');
-				}	
-			},
-			mouseleave: function() {
-				var cx = this.getAttribute("cx")
-				$(this).attr("style", emphasized[cx]);
-				delete emphasized[cx];
+				emphasize_ml(this, cx);
 			},
 			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var cx = this.getAttribute("cx");
-					$(this).attr("style", emphasized[cx]);
-					$(this).removeAttr('id');
-					delete emphasized[cx];
-					$(this).bind({
-						mouseleave: function() {
-							var cx = this.getAttribute("cx")
-							$(this).attr("style", emphasized[cx]);
-							delete emphasized[cx];
-						},
-					});	
-				} else {
-					$(this).off('mouseleave');		// keep emphasized
-				
-				}
-			}
-		});
-		//scatter plots -> circle
-		$("g:not([id$='-axis'])[id^='plot'] circle").bind({
-			mouseenter: function() {
 				var cx = this.getAttribute("cx");
-				//emphasized
-				if (emphasized[cx]) {
-					$(this).attr('id', 'e');	// emphasized already
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[cx] = style;
-					$(this).css('fill', 'crimson')		
-					$(this).css('stroke', 'fireBrick');
-					$(this).css('stroke-width', '3.0');
-				}	
-			},
-			mouseleave: function() {
-				var cx = this.getAttribute("cx")
-				$(this).attr("style", emphasized[cx]);
-				delete emphasized[cx];
-			},
-			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var cx = this.getAttribute("cx");
-					$(this).attr("style", emphasized[cx]);
-					$(this).removeAttr('id');
-					delete emphasized[cx];
-					$(this).bind({
-						mouseleave: function() {
-							var cx = this.getAttribute("cx")
-							$(this).attr("style", emphasized[cx]);
-							delete emphasized[cx];
-						},	
-					});
-				} else {
-					$(this).off('mouseleave');		// keep emphasized
-				
-				}
+				emphasize_click(this, cx);
 			}
 		});
-		//labels
-		$("g:not([id$='-axis'])[id^='plot'] text").bind({
-			mouseenter: function() {
-				var x = this.getAttribute("x");
-				//emphasized					
-				if (emphasized[x]) {
-					$(this).attr('id', 'e');	// emphasized already
-					console.debug("mouseenter: already emphasized")
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[x] = style;
-					$(this).css('fill', 'crimson');
-					console.debug("mouseenter: not already emphasized")
-				}
-				},
-			mouseleave: function() { 
-				var x = this.getAttribute("x")
-				$(this).attr("style", emphasized[x]);
-				delete emphasized[x];
-				console.debug("mouseleave")
-			},
-			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var x = this.getAttribute("x");
-					$(this).attr("style", emphasized[x]);
-					$(this).removeAttr('id');
-					delete emphasized[x];
-					$(this).bind({
-						mouseleave: function() { 
-							var x = this.getAttribute("x")
-							$(this).attr("style", emphasized[x]);
-							delete emphasized[x];
-						},
-					});
-					console.debug("click: um-emphasized")
-				} else {
-					$(this).off('mouseleave');		// keep emphasized
-					console.debug("click: emphasized")
-				}			
-			},
-		});
-		//links
-		$("#track_0 path").bind({
-			mouseenter: function() {
-				var d = this.getAttribute("d");
-				if (emphasized[d]) {
-					$(this).attr('id', 'e');	// emphasized already
-				} else {
-					var style = this.getAttribute("style");
-					emphasized[d] = style;
-					$(this).css('stroke', 'crimson');
-					$(this).css('stroke-width', '7')
-				}
-			},
-			mouseleave: function() {
-				var d = this.getAttribute("d")
-				$(this).attr("style", emphasized[d]);
-				delete emphasized[d];
-			},
-			click: function() {
-				if (this.getAttribute("id") == "e") {		// back un-emphasized
-					var d = this.getAttribute("d");
-					$(this).attr("style", emphasized[d]);
-					$(this).removeAttr('id');
-					delete emphasized[d];
-					$(this).bind({
-						mouseleave: function() {
-							var d = this.getAttribute("d")
-							$(this).attr("style", emphasized[d]);
-							delete emphasized[d];
-						},
-					});	
-				} else {
-					$(this).off('mouseleave');		// keep emphasized
-				
-				}
-			}
-		});
+	
+		
 	} else {
-		console.debug("highlights: OFF")
 		$("#ideograms text").unbind("mouseenter mouseleave click")
 		$("g[id^='plot'][id$='-axis'] path").unbind("mouseenter mouseleave")
 		$("g:not([id$='-axis'])[id^='plot'] path").unbind("mouseenter mouseleave click")
@@ -719,12 +550,20 @@ function h(){
 	}
 }
 
+
+
+
+
+
+
+
 //values + info -> ON/OFF
 function v(){
-	console.debug(document.getElementById('val').checked)
+
 	if(document.getElementById('val').checked){
 		//info about tracks' values
 		// histograms & heatmaps
+		
 		$("g[id^='plot'] path").each(function(i,v) {
 			id = $(this).parent()[0].id;
 			if (id.search('axis')==-1){

@@ -40,4 +40,4 @@ if error_string_en in o or error_string_en in e or error_string_fr in o or error
 
   sys.exit(0)
 
-app.run(debug = True, host='0.0.0.0', port=8099)
+app.run(debug = True, host='0.0.0.0', port=8081)
