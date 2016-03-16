@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
 {% block style %}
-.tooltip-inner {
-  background-color: #0088cc
+/*.tooltip-inner {
+  background-color: #0088cc;
+}*/
 
 .panzoom {
      -webkit-backface-visibility: initial !important;
      -webkit-transform-origin: 50% 50%;
  }
+ .panel-body-gi { 
+ 	font-size :0.9em;
 }
-
 {% endblock %}
 
 {% block help %}
@@ -313,16 +315,9 @@ getImage();
 
 var refresh = setInterval (function(){ getImage(); }, 10000);
 
-function tt(data){
-	console.debug(data)
-	console.debug(typeof data)
-	return data;
-};
-
 //callback function -> get value from asynchronous
 function ajax(c, s, e, species, callback){
 	var c = c.replace("chr","")
-	console.debug(species)
 	$.ajax({
 		url : "/gene_info/" + c + "/" + s + "/" + e + "/" + species,
 		cache : false,
@@ -347,7 +342,7 @@ function getImage () {
  	   		//console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
-				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-cog fa-spin fa-3x"></i></center></div>');
+				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-spinner fa-spin fa-3x"></i></center></div>');
 				{% endblock%} 	   		
 			}
 
@@ -364,7 +359,7 @@ function getImage () {
 				svg.setAttribute('width', "100%");
 				svg.setAttribute('height', "100%");
 				svg.setAttribute('viewBox', "-300 -300 3500 3500");
-				clearInterval(refresh);							
+				clearInterval(refresh);						
 			}
         },
        error : function(e) { console.debug(e);}
@@ -379,6 +374,7 @@ function getImage () {
 ********************************************/
 $(document).ready(function() {
 	$("[name='switch']").bootstrapSwitch();	
+
 });
 
 
@@ -395,8 +391,14 @@ $(panzoom).on('panzoomzoom', function(e, panzoom, scale, opt) {
     $("#perc").html((scale*100).toFixed(0) +"%");
 
 });
+$(panzoom).on('panzoomend', function(e, panzoom, m, changed) {
+	if (changed) {
+
+	}
+};
 */
 // zoom with wheel mouse  // jquery.panzoom.js example
+
 
 // Not using the zoom of panzoom 
 $(panzoom).parent().on('mousewheel', function( e ) {
@@ -418,7 +420,7 @@ $(panzoom).parent().on('mousewheel', function( e ) {
  	var v = val + "%"
  	var vb = [val * -3, val * -2.5, 3000 + (5 * val), 3000 + (5 * val)]
  	var n =  val < 100 ? -1 : 1 ; 
- 	$("perc").text(v);
+ 	$("#perc").text(v);
  	svg.setAttribute('width', v);
  	svg.setAttribute('height', v);
  	svg.setAttribute('viewBox', vb.join(" "));
@@ -438,12 +440,9 @@ function reset() {
 var emphasized = {}
 
 var emphasize_me = function (el, val, opts) {
-	if (emphasized[val]) {
-		$(el).attr('id', 'e');	// emphasized already
-	} else {
+	if (emphasized[val]==undefined) {
 		var style = el.getAttribute("style");
 		emphasized[val] = style;	
-		console.debug($(el));
 		$(el).css(opts);
 	}
 };
@@ -454,365 +453,299 @@ var emphasize_ml = function(el, val) {
 };
 
 var emphasize_click = function(el, val) {
-	
 	if (el.getAttribute("id") == "e") {		// back un-emphasized
 		$(el).removeAttr('id');
-		$(el).bind({ mouseleave: function() {emphasize_ml(el, val)}});
+		$(el).on('mouseleave.h', function() {emphasize_ml(el, val)});
 	} else {
-		$(el).unbind('mouseleave');		// keep emphasized
+		$(el).attr('id', 'e');	
+		$(el).off('mouseleave.h');		// keep emphasized
 	}			
 };
-
 
 function h(){
 
 	if(document.getElementById('highlights').checked){
-		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").bind({
-			mouseenter: function() {
+		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").on('mouseenter.h',  function() {
 				var opts = {'fill':'crimson'};
 				var x = this.getAttribute("x");
 				emphasize_me(this, x, opts);
-			},
-			mouseleave: function() {
+		});
+		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").on('mouseleave.h',  function() {
 				var x = this.getAttribute("x");
 				emphasize_ml(this, x);
-			},
-			click: function(){
+		});
+		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").on('click.h',  function() {
 				var x = this.getAttribute("x");
 				emphasize_click(this, x);
-			},
 		});
-		//plot-axis
-		$("g[id^='plot'][id$='-axis'] path, #track_0 path").bind({
-			mouseenter: function() {
-				d = this.getAttribute("d");	
+
+		//plot-axis and links
+		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('mouseenter.h', function() {
 				opts = {'stroke':'crimson', 'stroke-width':'2px'};
 				if (this.parentNode.id == "track_0") {
 					opts = {'stroke' : 'crimson', 'stroke-width' : '7.0'};
 				}
+				var d = this.getAttribute("d");	
 				emphasize_me(this, d, opts);
-			},
-			mouseleave: function() {
+		});
+		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('mouseleave.h', function() {
 				var d = this.getAttribute("d");
 				emphasize_ml(this, d);
-			},
-			click: function(){
-				d = this.getAttribute("d");
-				emphasize_click(this, d);
-			},
 		});
+		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('click.h', function() {
+				var d = this.getAttribute("d");
+				emphasize_click(this, d);
+		});
+			
 		//plots
-		$("g:not([id$='-axis'])[id^='plot'] path").bind({
-			mouseenter: function() {
+		$("g:not([id$='-axis'])[id^='plot'] > path").on('mouseenter.h', function(){
 				var d = this.getAttribute("d");
 				opts = {'fill' : 'crimson'};
 				if (this.getAttribute("class") == "tile") {
 					opts = {'fill' : 'crimson', 'stroke' : 'crimson', 'stroke-width' : '3.0'};
 				}
 				emphasize_me(this, d, opts);
-			},
-			mouseleave: function() {
+		});
+		$("g:not([id$='-axis'])[id^='plot'] > path").on('mouseleave.h', function(){
 				var d = this.getAttribute("d");
 				emphasize_ml(this, d);
-			},
-			click: function() {
+		});
+		$("g:not([id$='-axis'])[id^='plot'] > path").on('click.h', function(){
 				var d = this.getAttribute("d");
 				emphasize_click(this, d);
-			}
 		});
+
+
 		//scatter plots -> polygons
-		$("g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").bind({
-			mouseenter: function() {
+		$("g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").on('mouseenter.h', function() {
 				var cx = this.getAttribute("cx");
 				opts = {'fill':'crimson', 'stroke':'fireBrick','stroke-width':'3.0'};
 				emphasize_me(this, cx, opts);
-			},
-			mouseleave: function() {
+		});
+		$("g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").on('mouseleave.h', function() {
 				var cx = this.getAttribute("cx");
 				emphasize_ml(this, cx);
-			},
-			click: function() {
+		});
+		$("g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").on('click.h', function() {
 				var cx = this.getAttribute("cx");
 				emphasize_click(this, cx);
-			}
-		});
-	
-		
-	} else {
-		$("#ideograms text").unbind("mouseenter mouseleave click")
-		$("g[id^='plot'][id$='-axis'] path").unbind("mouseenter mouseleave")
-		$("g:not([id$='-axis'])[id^='plot'] path").unbind("mouseenter mouseleave click")
-		$("g:not([id$='-axis'])[id^='plot'] polygon").unbind("mouseenter mouseleave click")
-		$("g:not([id$='-axis'])[id^='plot'] rectangle").unbind("mouseenter mouseleave click")
-		$("g:not([id$='-axis'])[id^='plot'] circle").unbind("mouseenter mouseleave click")
-		$("g:not([id$='-axis'])[id^='plot'] text").unbind("mouseenter mouseleave click")
-		$("#track_0 path").unbind("mouseenter mouseleave click")
+		});		
+
+
+
+	} 
+	else {
+		$("#ideograms text,  g:not([id$='-axis'])[id^='plot'] text").off("mouseenter.h mouseleave.h click.h");
+		$("g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon").off("mouseenter.h mouseleave.h click.h");
+		$("g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").off("mouseenter.h mouseleave.h click.h");
+		$("#track_0 path, g[id^='plot'][id$='-axis'] > path").off("mouseenter.h mouseleave.h  click.h");
 	}
 }
 
 
 
+var build_gene_info = function (o, op) {
+	
+	var n = o.external_name;
+	var i = o.gene_id;
+	var f = o.strand;
+	var b = o.biotype.replace("_", " ");
+	var d = o.description==null ? o.description : o.description.split('[')[0];
+	
+	var ebLink = "http://useast.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g="+i;
+  	var gcLink = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+n+'&search='+n+'';
+  	var egLink = 'http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+i;
+  	//var wkLink = 'http://en.wikipedia.org/wiki/'+n;
+  	
+  	var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink}; //, 'Wikipedia': wkLink};
+  	var infos = ['Ensembl','EntrezGene']
 
+  	var l = '<ul class="breadcrumb">';
+	_.each(_.pairs(links), function(p) { l = l + '<li><a href="'+p[1]+'" target="_blank"> <strong>'+p[0]+'</strong></a></li>'; }); 
+	l = l + '</div>';
 
+	$(".panel-body-gi").empty().append("<div class='row'></div>");
+	$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+op.s+"-"+op.e+" (<b>value: </b>"+op.val+")</i></div>");
+	//"<br><b>ID: </b>"+ i +
+	$(".panel-body-gi .row").append("<div class='col-md-6' style='padding-top:5px;'><b>Gene: </b>" + n +  "<br><b>Biotype: </b>" + b + "</div>");
+
+	s = "<div class='col-md-6' style='padding-top:5px;'>"+ "<b>Chr: </b>" + op.chr + "<br><b>Strand: </b>" + f;
+	if (o.Location!= undefined){
+		s = s + "<br><b>Location: </b>" + o.Location;
+	}
+	$(".panel-body-gi .row").append(s+"</div>");
+	
+	$(".panel-body-gi .row").append("<div class='col-md-12'>"+"<b>Description: </b>" + d+"<br></div>");
+	if (o['Other Aliases']!= undefined) {
+		$(".panel-body-gi .row").append("<div class='col-md-12'>"+"<b>Aliases: </b>" + o['Other Aliases']+"<br></div>"); }
+	$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:10px;'>"+l+"</div>");
+
+} 
+
+var gene_data = {};
+var o = null;
+var add_gene_information = function (op) {
+	$(".panel-body-gi").empty().append('<center><div style="padding-top:10px;"><i class="fa fa-spinner fa-spin fa-2x"></i></div></center>');
+    var chr = op.chr;
+    var s = op.s;
+    var e = op.e; 
+    var val = op.val;
+    var url1 = server+"/map/"+species+"/GRCh37/"+String(chr.replace("chr",""))+":"+String(s)+".."+String(e)+":1/GRCh38?;content-type=application/json";
+   	
+  	var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=_id_&retmode=txt'; 
+  	var urlEnsemblId = 'http://rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
+    
+    if (gene_data[val]){
+    	build_gene_info (gene_data[val], op);
+    	return
+    }
+
+	$.ajax({url: url1}).then(function(data1) {
+		
+		// No mapping found between genome version
+		if (data1.mappings.length == 0){	
+			$(".panel-body-gi").empty().append("<div class='row'></div>");
+			$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+s+"-"+e+" (<b>value: </b>"+val+")</i></div>");
+			$(".panel-body-gi .row").append("<div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Chr: </b>" + chr +"</div>");
+			return;
+		}
+		// multiple mapping found
+		if (data1.mappings.length > 1) {
+			$(".panel-body-gi").empty().append("<div class='row'></div>");
+			$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+s+"-"+e+" (<b>value: </b>"+val+")</i></div>");
+			$(".panel-body-gi .row").append("<div class='col-md-6'><em>There are several genes within the selected position</em></div><div class='col-md-6'><b>Chr: </b>" + chr + "</div>");
+			return;
+		}
+
+		
+		// Only one mapping found
+		else {
+			var ms = data1["mappings"][0]["mapped"]["start"];
+    		var me = data1["mappings"][0]["mapped"]["end"];
+			var url2 = server+"/overlap/region/"+species+"/"+String(chr.replace("chr",""))+":"+String(ms)+"-"+String(me)+"?feature=gene;content-type=application/json";
+			
+			$.ajax({ url: url2 }).then(function(data2) {
+			// Gene not found
+			if (data2.length == 0){
+				$(".panel-body-gi").empty().append("<div class='row'></div>");
+				$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+s+"-"+e+" (<b>value: </b>"+val+")</i></div>");
+				$(".panel-body-gi .row").append("<div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Chr: </b>" + chr  + "</div>")
+			}
+			else {
+				
+				//console.debug(url1);
+				//console.debug(url2);
+				o  = data2[0];
+				if (data2.length > 1 ) {
+					if (isNaN(val)) {
+						for (i = 0; i < data2.length; i++) { 
+						
+    						if (data2[i].external_name==val) { o = data2[i];  break;}
+    					}
+					}
+					else {
+						$(".panel-body-gi").empty().append("<div class='row'></div>");
+						$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+s+"-"+e+" (<b>value: </b>"+val+")</i></div>");
+						$(".panel-body-gi .row").append("<div class='col-md-6'><em>There are " + data2.length + " genes within the selected position</em></div><div class='col-md-6'><b>Chr: </b>" + chr + "</div>");
+						 return;
+					}
+				}
+					
+				
+				$.ajax({
+					url:urlEnsemblId.replace('_id_', o.gene_id), 
+					success : function(r) { 
+						console.debug(r);
+						eg = _.where(r, {dbname:"EntrezGene"});
+						if (eg.length ==1 ){
+							egid = eg[0].primary_id;
+              			}
+              			else {
+              				gene_data[val] = o;
+							build_gene_info (o, op);
+							return;
+              			}
+              			$.ajax({url : urlNCBI.replace('_id_', egid), 
+              					success : function(r){ 
+              			
+              						r = r.split('\n');
+              						_.each(r, function(a) {
+           							r1 = a.split(':');
+           					
+           							if (!(_.isUndefined(r1[0])) & !(_.isUndefined(r1[1])) ){
+           		 						if (r1[1].search('Name')!=-1) {
+           									r1[1] = r1[1].replace('and Name', '');
+           									o['Name']= r1[2].replace(/ /g,'');;
+           								}
+           								if (r1[1].search('Location')!=-1) {
+           									r1[1] = r1[1].replace('; Location', "");
+           									o['Location']= r1[2].replace(/ /g,'');;
+           								}
+           		 						o[r1[0]]= r1[1].replace(/ /g,'');;
+           		 					}
+           							});
+           				
+              		 			}, 
+              		 			complete:  function() { 
+              		 				gene_data[val] = o;
+									build_gene_info (o, op);
+								}
+              			});
+              		}
+              	});
+
+              	
+			}
+		});									
+	}
+ });
+};
+
+var get_data = function(t) {
+	var val = t.getAttribute("data-value").replace(/'/g,"");
+	var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
+	var s = t.getAttribute("data-start");
+	var e = t.getAttribute("data-end");
+	return {val:val, chr:chr, s:s, e:e}
+};
+
+var get_tooltip_title = function (op) {
+	return '<b>' + op.val + '</b><br>' + op.chr + ': ' + op.s + '-' + op.e 
+};
 
 
 
 //values + info -> ON/OFF
 function v(){
 
+	var tooltip_opts = {title: "",
+						container: 'body', 
+						placement: "auto left", 
+						trigger: 'hover', 
+						html:true};
+
 	if(document.getElementById('val').checked){
-		//info about tracks' values
-		// histograms & heatmaps
 		
-		$("g[id^='plot'] path").each(function(i,v) {
+		$("g[id^='plot'] path, g[id^='plot'] text, g[id^='plot'] rectangle, g[id^='plot'] polygon, g[id^='plot'] circle").each( function(i,v){
+			
 			id = $(this).parent()[0].id;
 			if (id.search('axis')==-1){
-				var t = this
-				var val = t.getAttribute("data-value");
-				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-				var s = t.getAttribute("data-start");
-				var e = t.getAttribute("data-end");
-				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				$(this).bind("click", function(){
-					$(this).bind("mouseleave", function(){
-						$(this).tooltip("hide")
+				var op = get_data (this);
+				tooltip_opts.title = get_tooltip_title (op);
+				tooltip_opts.viewport = this;
+				$(this).tooltip(tooltip_opts);
+
+				$(this).on("click.v", function(){ 
+					$(this).on("mouseleave.v", function(){ 
+						$(this).tooltip("hide") 
 					});
-					document.getElementById("gene_info").style.display = "block";
+					document.getElementById("gene_info").style.display = "block";	
+					add_gene_information (op);
 					
-					$.ajax({
-        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    					}).then(function(data1) {
-						console.debug(data1)
-							if (data1.mappings.length == 0){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else if (data1.mappings.length > 1){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else {
-								var ms = data1["mappings"][0]["mapped"]["start"]
-    								var me = data1["mappings"][0]["mapped"]["end"]
-								$.ajax({
-									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    						}).then(function(data2) {
-									console.debug(data2)
-									if (data2.length == 0){
-									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}else {
-										console.debug(data2[0]['external_name'])
-										console.debug(data2[0]['gene_id'])
-										console.debug(data2[0]['biotype'])
-										console.debug(data2[0]['description'])
-										var n = data2[0]['external_name']
-										var i = data2[0]["gene_id"]
-										var b = (data2[0]["biotype"]).replace("_", " ")
-										var d = data2[0]["description"]
-										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}
-								});									
-							}
-    						});
-				})
+				});
 			}
 		});
-		// labels
-		$("g[id^='plot'] text").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			console.debug('DONE')
-			if (id.search('axis')==-1){
-				var t = this
-				var val = (t.getAttribute("data-value")).replace(/'/g,"");
-				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-				var s = t.getAttribute("data-start");
-				var e = t.getAttribute("data-end");
-				//$(this).attr('title', "<b>" + val + "</b><br>" + chr + ": " + s + "-" + e)
-				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: "body", trigger: 'hover', placement: "auto left", html:'false'});
-				$(this).bind("click", function(){
-					$(this).bind("mouseleave", function(){
-						$(this).tooltip("hide")
-					});
-					document.getElementById("gene_info").style.display = "block";
-					
-					$.ajax({
-        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    					}).then(function(data1) {
-						console.debug(data1)
-							if (data1.mappings.length == 0){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else if (data1.mappings.length > 1){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else {
-								var ms = data1["mappings"][0]["mapped"]["start"]
-    								var me = data1["mappings"][0]["mapped"]["end"]
-								$.ajax({
-									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    						}).then(function(data2) {
-									console.debug(data2)
-									if (data2.length == 0){
-									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}else {
-										console.debug(data2[0]['external_name'])
-										console.debug(data2[0]['gene_id'])
-										console.debug(data2[0]['biotype'])
-										console.debug(data2[0]['description'])
-										var n = data2[0]['external_name']
-										var i = data2[0]["gene_id"]
-										var b = data2[0]["biotype"]
-										var d = data2[0]["description"]
-										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}
-								});									
-							}
-    						});
-				})
-			}
-		});
-		// scatter plots : circle glyphs
-		$("g[id^='plot'] circle").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				var t = this
-				var val = (t.getAttribute("data-value")).replace(/'/g,"");
-				var chr = (t.getAttribute("data-chr")).replace(/'/g,"");
-				var s = t.getAttribute("data-start");
-				var e = t.getAttribute("data-end");
-				$(this).tooltip({title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				$(this).bind("click", function(){
-					$(this).bind("mouseleave", function(){
-						$(this).tooltip("hide")
-					});
-					document.getElementById("gene_info").style.display = "block";
-					
-					$.ajax({
-        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    					}).then(function(data1) {
-						console.debug(data1)
-							if (data1.mappings.length == 0){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else if (data1.mappings.length > 1){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else {
-								var ms = data1["mappings"][0]["mapped"]["start"]
-    								var me = data1["mappings"][0]["mapped"]["end"]
-								$.ajax({
-									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    						}).then(function(data2) {
-									console.debug(data2)
-									if (data2.length == 0){
-									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}else {
-										console.debug(data2[0]['external_name'])
-										console.debug(data2[0]['gene_id'])
-										console.debug(data2[0]['biotype'])
-										console.debug(data2[0]['description'])
-										var n = data2[0]['external_name']
-										var i = data2[0]["gene_id"]
-										var b = (data2[0]["biotype"]).replace("_", " ")
-										var d = data2[0]["description"]
-										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}
-								});									
-							}
-    						});
-				})
-			}
-		});
-		// scatter plots: rectangle glyphs
-		$("g[id^='plot'] rectangle").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				var val = this.getAttribute("data-value");
-				var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
-				var s = this.getAttribute("data-start");
-				var e = this.getAttribute("data-end");
-				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				$(this).bind("click", function(){
-					$(this).bind("mouseleave", function(){
-						$(this).tooltip("hide")
-					});
-					document.getElementById("gene_info").style.display = "block";
-					
-					$.ajax({
-        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    					}).then(function(data1) {
-						console.debug(data1)
-							if (data1.mappings.length == 0){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else if (data1.mappings.length > 1){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else {
-								var ms = data1["mappings"][0]["mapped"]["start"]
-    								var me = data1["mappings"][0]["mapped"]["end"]
-								$.ajax({
-									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    						}).then(function(data2) {
-									console.debug(data2)
-									if (data2.length == 0){
-									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}else {
-										console.debug(data2[0]['external_name'])
-										console.debug(data2[0]['gene_id'])
-										console.debug(data2[0]['biotype'])
-										console.debug(data2[0]['description'])
-										var n = data2[0]['external_name']
-										var i = data2[0]["gene_id"]
-										var b = (data2[0]["biotype"]).replace("_", " ")
-										var d = data2[0]["description"]
-										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}
-								});									
-							}
-    						});
-				})
-			}
-		});
-		// scatter plots: triangles glyphs
-		$("g[id^='plot'] polygon").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				var val = this.getAttribute("data-value");
-				var chr = (this.getAttribute("data-chr")).replace(/'/g,"");
-				var s = this.getAttribute("data-start");
-				var e = this.getAttribute("data-end");
-				$(this).tooltip('show', {title: '<b>' + val + '</b><br>' + chr + ': ' + s + '-' + e , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-				$(this).bind("click", function(){
-					$(this).bind("mouseleave", function(){
-						$(this).tooltip("hide")
-					});
-					document.getElementById("gene_info").style.display = "block";
-					
-					$.ajax({
-        					url: server + "//map/" + species + "/GRCh37/" + String(chr.replace("chr","")) + ":" + String(s) + ".." + String(e) + ":1/GRCh38?;content-type=application/json"
-    					}).then(function(data1) {
-						console.debug(data1)
-							if (data1.mappings.length == 0){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else if (data1.mappings.length > 1){
-								$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>There are " + data1.mappings.length + " genes within the selected position</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-							}else {
-								var ms = data1["mappings"][0]["mapped"]["start"]
-    								var me = data1["mappings"][0]["mapped"]["end"]
-								$.ajax({
-									url: server + "/overlap/region/" + species + "/" + String(chr.replace("chr","")) + ":" + String(ms) + "-" + String(me) + "?feature=gene;content-type=application/json"
-		    						}).then(function(data2) {
-									console.debug(data2)
-									if (data2.length == 0){
-									$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><em>This position does not correspond to a gene</em></div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}else {
-										console.debug(data2[0]['external_name'])
-										console.debug(data2[0]['gene_id'])
-										console.debug(data2[0]['biotype'])
-										console.debug(data2[0]['description'])
-										var n = data2[0]['external_name']
-										var i = data2[0]["gene_id"]
-										var b = (data2[0]["biotype"]).replace("_", " ")
-										var d = data2[0]["description"]
-										$(".panel-body-gi").empty().append("<div class='row'><div class='col-md-6'><b>Gene: </b>" + n + "<br><b>ID: </b>" + i + "<br><b>Biotype: </b>" + b + "<br><b>Description: </b>" + d + "</div><div class='col-md-6'><b>Value: </b>" + val + "<br><b>Chr: </b>" + chr + "<br><b>Position: </b>" + s + " - " + e + "</div></div>")
-									}
-								});									
-							}
-    						});
-				})
-			}
-		});
+		
 		// links
 		$("#track_0 path").each(function(i,v) {
 			var chr1 = (this.getAttribute("data-chr1")).replace(/'/g,"");
@@ -821,51 +754,28 @@ function v(){
 			var chr2 = (this.getAttribute("data-chr2")).replace(/'/g,"");
 			var s2 = this.getAttribute("data-start2");
 			var e2 = this.getAttribute("data-end2");
-			$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true'});
-			$(this).bind("click", function(){
-				$(this).bind("mouseleave", function(){
+			
+			$(this).tooltip({title: chr1 + ': ' + s1 + '-' + e1 + '<br>to<br>' + chr2 + ': ' + s2 + '-' + e2 , container: 'body', placement: "auto left", trigger:'hover', html:'true', viewport:this});
+			$(this).on("click.v", function(){
+				$(this).on("mouseleave", function(){
 					$(this).tooltip("hide")
 				});
 			});
 		});
-	} else {
-		$("g[id^='plot'] path").each(function(i,v) {
+	} 
+	else {
+		
+		$("g[id^='plot'] path, g[id^='plot'] text, g[id^='plot'] circle, g[id^='plot'] rectangle, g[id^='plot'] polygon, #track_0 path").each(function(i,v) {
 			id = $(this).parent()[0].id;
 			if (id.search('axis')==-1){
 				$(this).tooltip('destroy');
-				$(this).unbind("click");
-			}
-		});
-		$("g[id^='plot'] text").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				$(this).tooltip('destroy');
-				$(this).unbind("click");
-			}
-		});
-		$("g[id^='plot'] circle").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				$(this).tooltip('destroy');
-				$(this).unbind("click");
-			}
-		});
-		$("g[id^='plot'] rectangle").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				$(this).tooltip('destroy');
-				$(this).unbind("click");
-			}
-		});
-		$("g[id^='plot'] polygon").each(function(i,v) {
-			id = $(this).parent()[0].id;
-			if (id.search('axis')==-1){
-				$(this).tooltip('destroy');
-				$(this).unbind("click");
+				$(this).off("click.v");
 			}
 		});
 	}
 }
+
+
 		
 </script>
 {% endblock %}
