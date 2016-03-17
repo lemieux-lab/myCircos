@@ -23,6 +23,13 @@
 			    margin-right: auto;
 			    width: 97%;
 			}
+			.navbar-brand {
+				font-size : 16px;
+			}
+			#userid {
+				font-size : 12px;
+			}
+			
 			{% block style %}{% endblock %}
 		</style>
 		<link rel="icon" type="image/png" href="{{ url_for('image', img='favicon.ico')}}">
@@ -33,7 +40,7 @@
 			<!-- navigation bar-->
 			<div class="row">
 				<div class="col-md-2">
-					<img class="media-object" src="{{ url_for('image', img='logo.png')}}" style="margin-left: auto; margin-right: auto; width:80%; height:80%;">
+					<img class="media-object" src="{{ url_for('image', img='logo.png')}}" style="margin-left: 10px; margin-right: auto; width:75%; height:75%; padding-top:3px;">
 				</div>
 				<div class="col-md-10">
 					<br>
@@ -56,12 +63,13 @@
 						<ul class="nav navbar-nav pull-right">
 							<li><a class="navbar-brand" href="#" role="button" data-toggle="modal" data-target="#help_info"><span class="glyphicon glyphicon-question-sign"></span> Help </a><li>
 							<li class="dropdown">
-						    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+						    		<a class="navbar-brand" href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span><span id="userid">
 									{% if current_user.is_authenticated %}
 										{{ current_user.email }} 
 									{% else %}
 										User  
 									{% endif %}
+								</span>
 								</a>
 						    		<ul class="dropdown-menu">
 						       	 		<li><a href="/logout">Log Out</a></li>

@@ -9,6 +9,8 @@ import os, os.path
 import datetime, time, random, shutil, stat
 from random import randint
 from util import *
+from .models import User, Circos
+
 
 USER = 'app/circos/usr'
 CONF = 'app/circos'
@@ -28,11 +30,11 @@ def maintenance():
       shutil.rmtree('%s/%s/%s' % (USER, user, folder), onerror=force_delete) 
 
       #removing id from bd if it's there   ## not used for now
-      #u = db.session.query(User).filter_by(email=user).first()
-      #c = db.session.query(Circos).filter_by(user_id=u.id, svg=folder).first()
-      #if c : 
-      #  db.session.delete(c)
-      #  db.session.commit()
+      u = db.session.query(User).filter_by(email=user).first()
+      c = db.session.query(Circos).filter_by(user_id=u.id, svg=folder).first()
+      if c : 
+        db.session.delete(c)
+        db.session.commit()
   
   #generate task's repository ---> info.txt, specific.conf, circos_<unique>.svg
   directory = '%s/%s/%s' % (USER, user, unique)

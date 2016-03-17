@@ -11,6 +11,9 @@ print "looking if circos is running properly"
 cmd = 'circos'
 o,e = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
+# Not enough if celery and run.py are launched from different terminal. 
+# Circos need to be found by celery // not a problem if one uses run.sh
+
 error_string_en = 'ommand not found'
 error_string_fr = 'ommande introuvable'
 if error_string_en in o or error_string_en in e or error_string_fr in o or error_string_fr in e:  

@@ -5,6 +5,15 @@
   background-color: #0088cc;
 }*/
 
+#image_div {
+	padding-left : 5px;
+}
+
+#options{
+	
+	padding-left : 0px;
+
+}
 .panzoom {
      -webkit-backface-visibility: initial !important;
      -webkit-transform-origin: 50% 50%;
@@ -59,7 +68,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 {% endblock %}
 
 {% block header %}
-<h1> Generated Circos <small>{{ unique }}</small></h1>
+<h2> Generated Circos <small>{{ unique }}</small></h2>
 {% endblock %}
 
 {% block content %}
@@ -89,13 +98,15 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-8" id="image_div">
 		<div class='svg' id='image_svg' display="block" margin="auto"></div>
 	</div>
-	<div class="col-md-4">
+
+	<div class="col-md-4" >
+		<div id="options">
 		{% if 'Tabular' not in type %}
 		<!-- Enable Highlights -->
-		<div class="row" >
+		<div class="row" style="padding-top:10px;">
 			<div class="col-md-5">
 				<label for="highlights"><font color="#0088cc">Highlights</font></label> 
 			</div>
@@ -134,6 +145,7 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 					{% endif %}
 				</div>
 			</div>
+		</div>
 		</div>
 		
 		<!-- Hidden -->
@@ -348,12 +360,12 @@ function getImage () {
 
 			else if (content == 'error') {
 				$("#image_svg").html('<div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><em>An error has occured while generating your circos. Please check your files and try again</em></div>');
-				$("#info").html('')
+				$("#info").html('');
 				clearInterval(refresh);
 			}
 
  	   		else {  
-				
+				$("#image_svg").css('border', 'solid #eee 1px');
 				$("#image_svg").html(content);
                 var svg = $('#image_svg').find('svg')[0];
 				svg.setAttribute('width', "100%");
@@ -362,8 +374,7 @@ function getImage () {
 				clearInterval(refresh);						
 			}
         },
-       error : function(e) { console.debug(e);}
-
+       error : function(e) { console.debug(e);},
       });
 }
 
@@ -374,7 +385,6 @@ function getImage () {
 ********************************************/
 $(document).ready(function() {
 	$("[name='switch']").bootstrapSwitch();	
-
 });
 
 
@@ -501,7 +511,7 @@ function h(){
 		$("g:not([id$='-axis'])[id^='plot'] > path").on('mouseenter.h', function(){
 				var d = this.getAttribute("d");
 				opts = {'fill' : 'crimson'};
-				if (this.getAttribute("class") == "tile") {
+				if (this.getAttribute("class") == "tile" || this.getAttribute("class")=='histogram') {
 					opts = {'fill' : 'crimson', 'stroke' : 'crimson', 'stroke-width' : '3.0'};
 				}
 				emphasize_me(this, d, opts);
@@ -560,9 +570,9 @@ var build_gene_info = function (o, op) {
   	var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink}; //, 'Wikipedia': wkLink};
   	var infos = ['Ensembl','EntrezGene']
 
-  	var l = '<ul class="breadcrumb">';
+  	var l = '<center><ul class="breadcrumb">';
 	_.each(_.pairs(links), function(p) { l = l + '<li><a href="'+p[1]+'" target="_blank"> <strong>'+p[0]+'</strong></a></li>'; }); 
-	l = l + '</div>';
+	l = l + '</ul></center>';
 
 	$(".panel-body-gi").empty().append("<div class='row'></div>");
 	$(".panel-body-gi .row").append("<div class='col-md-12' style='padding-top:5px;'>"+ "<i><b>For position: </b>"+op.s+"-"+op.e+" (<b>value: </b>"+op.val+")</i></div>");
@@ -713,8 +723,6 @@ var get_tooltip_title = function (op) {
 	return '<b>' + op.val + '</b><br>' + op.chr + ': ' + op.s + '-' + op.e 
 };
 
-
-
 //values + info -> ON/OFF
 function v(){
 
@@ -776,6 +784,5 @@ function v(){
 }
 
 
-		
 </script>
 {% endblock %}
