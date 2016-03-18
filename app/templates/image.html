@@ -9,10 +9,10 @@
 	padding-left : 5px;
 }
 
-#ideograms text,  g:not([id$='-axis'])[id^='plot'] text, g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle, 
+/*#ideograms text,  g:not([id$='-axis'])[id^='plot'] text, g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle, 
 #track_0 path {
-	cursor: crossor;
-}
+	cursor: crosshair;
+}*/
 
 #options{
 	
@@ -369,7 +369,10 @@ function getImage () {
  	   		//console.debug(++timesRun);		
  	   		if (content=='' | content ==undefined) {
  	   			{% block display %}	
-				$('#image_svg').html('<div style="padding:10px;"><center><i class="fa fa-spinner fa-spin fa-3x"></i></center></div>');
+ 	   			//<span class="fa fa-spinner fa-spin fa-3x"></span>
+ 	   			var loader = '<center><div style="padding-top:10px;"><img src="_path_"/> </div></center>'.replace("_path_", "{{url_for('static', filename='img/ajax-loader.gif')}}");
+ 	   			console.debug(loader);
+				$('#image_svg').html(loader);
 				{% endblock%} 	   		
 			}
 
@@ -461,6 +464,14 @@ function reset() {
 	document.location.reload(true);
 };
 
+var reset_cursor = function() {
+	$("#ideograms text,  g:not([id$='-axis'])[id^='plot'] text, g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle, #track_0 path").css({'cursor': 'move'});
+};
+var change_cursor = function() {
+	$("#ideograms text,  g:not([id$='-axis'])[id^='plot'] text, g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon, g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle, #track_0 path").css({
+		'cursor': 'pointer'});
+};
+
 //highlight -> ON/OFF
 var emphasized = {}
 
@@ -490,6 +501,8 @@ var emphasize_click = function(el, val) {
 function h(){
 
 	if(document.getElementById('highlights').checked){
+		change_cursor();
+		
 		$("#ideograms text, g:not([id$='-axis'])[id^='plot'] text").on('mouseenter.h',  function() {
 				var opts = {'fill':'crimson'};
 				var x = this.getAttribute("x");
@@ -560,6 +573,7 @@ function h(){
 
 	} 
 	else {
+		reset_cursor();
 		$("#ideograms text,  g:not([id$='-axis'])[id^='plot'] text").off("mouseenter.h mouseleave.h click.h");
 		$("g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon").off("mouseenter.h mouseleave.h click.h");
 		$("g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").off("mouseenter.h mouseleave.h click.h");
@@ -610,7 +624,9 @@ var build_gene_info = function (o, op) {
 var gene_data = {};
 var o = null;
 var add_gene_information = function (op) {
-	$(".panel-body-gi").empty().append('<center><div style="padding-top:10px;"><i class="fa fa-spinner fa-spin fa-2x"></i></div></center>');
+	//<span class="fa fa-spinner fa-spin fa-2x"></span>static/img/ajax-loader.gif
+	var loader = '<center><div style="padding-top:10px;"><img src="_path_"/> </div></center>'.replace("_path_", "{{url_for('static', filename='img/ajax-loader.gif')}}");
+	$(".panel-body-gi").empty().append(loader);
     var chr = op.chr;
     var s = op.s;
     var e = op.e; 
@@ -749,6 +765,9 @@ function v(){
 
 	if(document.getElementById('val').checked){
 		
+		change_cursor();
+		
+
 		$("g[id^='plot'] path, g[id^='plot'] text, g[id^='plot'] rectangle, g[id^='plot'] polygon, g[id^='plot'] circle").each( function(i,v){
 			
 			id = $(this).parent()[0].id;
@@ -787,6 +806,7 @@ function v(){
 		});
 	} 
 	else {
+		reset_cursor();
 		
 		$("g[id^='plot'] path, g[id^='plot'] text, g[id^='plot'] circle, g[id^='plot'] rectangle, g[id^='plot'] polygon, #track_0 path").each(function(i,v) {
 			id = $(this).parent()[0].id;
