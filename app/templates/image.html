@@ -489,8 +489,8 @@ function h(){
 				emphasize_click(this, x);
 		});
 
-		//plot-axis and links
-		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('mouseenter.h', function() {
+		// links only!! //and plot-axis and g[id^='plot'][id$='-axis'] > path
+		$("#track_0 path").on('mouseenter.h', function() {
 				opts = {'stroke':'crimson', 'stroke-width':'2px'};
 				if (this.parentNode.id == "track_0") {
 					opts = {'stroke' : 'crimson', 'stroke-width' : '7.0'};
@@ -498,11 +498,11 @@ function h(){
 				var d = this.getAttribute("d");	
 				emphasize_me(this, d, opts);
 		});
-		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('mouseleave.h', function() {
+		$("#track_0 path").on('mouseleave.h', function() {
 				var d = this.getAttribute("d");
 				emphasize_ml(this, d);
 		});
-		$("g[id^='plot'][id$='-axis'] > path, #track_0 path").on('click.h', function() {
+		$("#track_0 path").on('click.h', function() {
 				var d = this.getAttribute("d");
 				emphasize_click(this, d);
 		});
@@ -548,7 +548,7 @@ function h(){
 		$("#ideograms text,  g:not([id$='-axis'])[id^='plot'] text").off("mouseenter.h mouseleave.h click.h");
 		$("g:not([id$='-axis'])[id^='plot'] > path, g:not([id$='-axis'])[id^='plot'] polygon").off("mouseenter.h mouseleave.h click.h");
 		$("g:not([id$='-axis'])[id^='plot'] rectangle, g:not([id$='-axis'])[id^='plot'] circle").off("mouseenter.h mouseleave.h click.h");
-		$("#track_0 path, g[id^='plot'][id$='-axis'] > path").off("mouseenter.h mouseleave.h  click.h");
+		$("#track_0 path").off("mouseenter.h mouseleave.h  click.h");
 	}
 }
 
