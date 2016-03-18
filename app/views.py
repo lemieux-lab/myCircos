@@ -299,7 +299,8 @@ def index_config():
   CONF = 'app/circos'
   INFO = '%s/%s/%s/info.txt' % (USER, user, unique)
   TASK = '%s/%s/%s' % (USER, user, unique)
-  CIR_CONF = '%s/%s/%s/circos.conf' % (USER, user, unique)
+  CIR_CONF_1 = '%s/%s/%s/circos.conf' % (USER, user, unique)
+  CIR_CONF_2 = '%s/%s/%s/etc/circos.conf' % (USER, user, unique)
   
   if request.method == 'POST': 
     folder = request.files['config']

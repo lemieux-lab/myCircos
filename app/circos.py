@@ -83,7 +83,6 @@ def specific(unique):
   print "**********************************"
   print 'starting specific'
   user = authenticate()
-  print user
   with open('%s/%s/%s/circos.conf' % (USER, user, unique), 'r+b' ) as f:
     #look if already specify
     parameters = f.readlines()
