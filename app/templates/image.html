@@ -119,6 +119,16 @@ The <b>legend</b> is there as a track identifier. The first thing to be displaye
 				<input class="disabled" id="highlights" type="checkbox" name="switch" data-handle-width="50px" data-size="mini" onChange="h()">
 			</div>
 		</div>
+		{% if 'onfig' in type %}
+		<div class="row" style="padding-top:10px;">
+			<div class="col-md-10">
+				<div class="alert alert-info" role="alert">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<b>Don't see highlights on your tracks' values?</b><br>When constructing your &ltplots&gt...&lt/plots&gt you must consider filling the bins/glyphs/tiles
+				</div>
+			</div>
+		</div>
+		{% endif %}
 		{% endif %}
 
 		{% if 'Tabular' not in type %}

@@ -15,6 +15,7 @@ def svg(f):
   p = []
   r = []
   l = []
+
   #looking for <plot>
   for i, line in enumerate(open(f)):
     for match in re.finditer('<plot>|</plot>', line):
@@ -72,8 +73,7 @@ def svg(f):
 	    print('there is no rule between <link> %s, %s' % (l[y], l[y+1]))
 	    lines[l[y]] = '%s%s%s%s' % (s, link, e, lines[l[y]])
 	    break
-
-
+  
   with open(f, 'w') as conf:
     for i in range(0, len(lines)):
       conf.write(lines[i])
